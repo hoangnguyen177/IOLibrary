@@ -1,0 +1,82 @@
+This library will be used for communicating between different clients.
+
+2 types: sources and sinks
+sources: init the connection, request what data needed or to be exported
+sink: based on that, decide what type of things to do (create forms, or display it)
+
+for instance:
+- a source wants to get a new value
+it uses this library, request to get a new value
+the sink that listens to this source, creates a new - say text element - and get the value, returns it back
+
+- atm a source is connected to a sink
+a source and transmits data to many sink, but a source can only listens for value from one sink
+
+- there are different types of requests:
++ input: asks sink for a value
++ output: asks the sink to display value
++ inout: ask the sink for a value based on what is being displayed
+
+
+The question here is shoud I take rappture's path ???
+for instance:
+
+<run>
+#     <input>
+#         <number id="Ef">
+#             <units>eV</units>
+#             <min>-10eV</min>
+#             <max>10eV</max>
+#             <default>0eV</default>
+#             <current>3eV</current>
+#         </number>
+#     </input>
+# </run>
+
+then access it by input.number(Ef).current then I can change the current value, or query for its current value
+
+
+This is very flexible, but again how do I display these ???? Does the user have to decide about the interface ?  -- user here means programmer
+
+Yes, follow that i.e the library access elements by path, instead of send messages.
+
+Another thing, should I make config (host/port) global ? or per connection
+Decision: one connection
+if an operation wants another conneciton, it has to define in its definition
+use pool for that
+
+when a request is send, it will be appended into an array to be serve
+
+TODO: what if a lot of data expoting, then it will freeze the input channel ?
+For now, just use one connection first. 
+
+I guess the best thing about making this is we can decide whether to assign each "operation" a seperate connection or not. Make it an option then 
+
+{
+name: "group"
+layout: "default",
+comment: "vertical layout"
+{
+	op_name: "in1",
+	host: "abc",
+	port: 8080,
+	seperate_connection: "yes", // seperation connection or not
+	comment:"accesspath = group.in1"
+	op_type:"in",
+	data_type:"int",
+	prompt:"what is the value",
+	comment:"empty means default",
+	group:"unique",
+	 
+}
+
+{
+name: "ingroup"
+	{
+		name:"out1"
+		data_type: "binary",
+		display_type: "graph/image/video/file",
+		
+	}
+}
+}
