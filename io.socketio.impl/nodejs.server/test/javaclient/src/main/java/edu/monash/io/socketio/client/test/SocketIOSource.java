@@ -52,7 +52,7 @@ public class SocketIOSource{
 		}).on(TestConsts.CLIENT_E_MESSAGE, new Emitter.Listener() {
 		  @Override
 		  public void call(Object... args) {
-		  	//System.out.println("message:" + args[0].toString());
+		  	System.out.println("message:" + args[0].toString());
 		  	JsonObject obj = (JsonObject)args[0];
 		  	String msgCode = obj.get("messagetype").getAsString() ;
 		  	if(msgCode.equals(TestConsts.SERVER_E_AUTH_RETURN)){
@@ -61,9 +61,6 @@ public class SocketIOSource{
 		  	}
 		  	else if(msgCode.equals(TestConsts.SERVER_E_SINK_DISCONNECT)){
 		  		System.out.println("sink disconnect, no more sink");
-		  	}
-		  	else if(msgCode.equals(TestConsts.SERVER_E_SINK_CONNECT)){
-		  		System.out.println("sink connect, lit of sinks:" + obj.get("sinklist").toString());
 		  	}
 		  	else if(msgCode.equals(TestConsts.SERVER_E_SINK_CONNECT)){
 		  		System.out.println("sink connect, lit of sinks:" + obj.get("sinklist").toString());
@@ -78,6 +75,7 @@ public class SocketIOSource{
 	                	FileOutputStream fos = new FileOutputStream(newFile);
 	                	fos.write(imageReceived);
 	                	fos.close();
+	                	System.out.println("Image written");
 	                }
 	                catch(Exception e){
 	  	              e.printStackTrace();

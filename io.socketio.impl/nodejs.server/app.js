@@ -128,7 +128,7 @@ var authcatedClients = {};
 
 //serving all the connections
 io.of(nsp).on(CLIENT_CONST.connect, function (socket) {
-  log('[connect] New connection has been established. Id=', socket.id);
+  log('[connect] New connection from id:' +  socket.id);
 
   
     /////////////// authenticate ///////////////////
@@ -157,7 +157,7 @@ io.of(nsp).on(CLIENT_CONST.connect, function (socket) {
     if(details[CONNECTION_CONST.clienttype] === CONNECTION_CONST.source){
       //add to sources
       sources[socket.id] = socket;      
-      log("[auth] New source added: ", socket.id);
+      log("[auth] New source added: "+ socket.id);
       //return the result
       var _authreply = {  
                           messagetype :SERVER_CONST.auth_return, 
@@ -165,16 +165,17 @@ io.of(nsp).on(CLIENT_CONST.connect, function (socket) {
                           authresult : 'true', 
                           comment: '',
                         };
-      log("[auth] message to source:", _authreply);
+      log("[auth] notify source about the authentication:"+ _authreply);
       socket.send(_authreply);
       //notify all the sinks that a new source has been connected
       var _msgToSink = {
             messagetype: SERVER_CONST.source_connect,
             sourcelist: prepareSourcesList(sources),
       }
-      log("[auth] message to sink:", _msgToSink);
+      log("[auth] notify all sinks that new source has connected:"+ _msgToSink);
       for(var _sinkid in sinks){
         sinks[_sinkid].send(_msgToSink);
+        console.log('[auth] sending: ', _msgToSink, " to:", _sinkid);
       }
 
     }
@@ -182,7 +183,7 @@ io.of(nsp).on(CLIENT_CONST.connect, function (socket) {
     else{
         //add to sink list
         sinks[socket.id] = socket;
-        log("[auth] New sink added: ", socket.id);
+        log("[auth] new sink added: "+ socket.id);
         //return the result: 
         var _authreply = { 
                 messagetype: SERVER_CONST.auth_return,
@@ -191,7 +192,7 @@ io.of(nsp).on(CLIENT_CONST.connect, function (socket) {
                 sourcelist: prepareSourcesList(sources), // list of sources - removed some information
                 comment: ''
         };
-        log("[auth] message to sink:", _authreply);  
+        log("[auth] notify the sink about the authenticaiton and list of sources:"+ _authreply);  
         socket.send(_authreply);
 
     }
@@ -207,7 +208,7 @@ io.of(nsp).on(CLIENT_CONST.connect, function (socket) {
   * send to the sink, the sink can "replay" or ignore them
   */
   socket.on(CLIENT_CONST.selectsource, function(_sourceid){
-    log("[message] from ", socket.id, " selectsource:", _sourceid);
+    log("[selectsource] from "+ socket.id +  " selectsource:" + _sourceid);
     if(isSource(_sourceid, sources))  {
       if(connections.hasOwnProperty(_sourceid))
         connections[_sourceid].push(socket.id);
@@ -227,20 +228,23 @@ io.of(nsp).on(CLIENT_CONST.connect, function (socket) {
       sinks[socket.id].send({ messagetype: SERVER_CONST.connection_established, allowedoperations: _allowedOpts});
       sinks[socket.id][CONNECTION_CONST.details][MESSAGE_CONST.allowed_operations] = _allowedOpts;
       // when receive message, also checks whether its the first one connected 
-      log("[selectsource] Sink:", socket.id, " connects to source:", _sourceid);
+      log("[selectsource] sink:" + socket.id +  " connects to source:" +  _sourceid);
     }
     else
-      log("[selectsource] ", _sourceid, " is an invalid source id");
+      log("[selectsource] "+ _sourceid+ " is an invalid source id");
   });
 
 
   /////////////// message ///////////////////
   socket.on(CLIENT_CONST.message, function(message){
-    log("[message] from ", socket.id, " message:", message);
+    log("[message] message from "+ socket.id + " message:", message);
     // message from source
     if(isSource(socket.id, sources)){
       //distribute it to the sinks
-      log("[message] send message to sinks");
+      if(connections[socket.id].length > 0)
+        log("[message] send message to all sinks");
+      else
+        log("[message] this source is not connected to any sink.");
       for(var _index in connections[socket.id]){
         sinks[connections[socket.id][_index]].send(message);
       }
@@ -251,20 +255,20 @@ io.of(nsp).on(CLIENT_CONST.connect, function (socket) {
         var _sourceIdOfTheSink = findSource(socket.id, connections);
         if(_sourceIdOfTheSink){
           // send to source
-          log("[message] send message to source:", _sourceIdOfTheSink);
+          log("[message] send message to source:"+ _sourceIdOfTheSink);
           sources[_sourceIdOfTheSink].send(message);  
           for(var _sink in connections[_sourceIdOfTheSink]){
             if(connections[_sourceIdOfTheSink][_sink] !== socket.id ){
-              log("[message] send message to (other) sink:", connections[_sourceIdOfTheSink][_sink]);
+              log("[message] send message to (other) sink:"+ connections[_sourceIdOfTheSink][_sink]);
               sinks[connections[_sourceIdOfTheSink][_sink]].send(message);
             }//end if
           }//end for
         }//end if
         else
-          log("[mesage]Cannot find source:", socket.id, " in connections:", connections);
+          log("[mesage]Cannot find source:" + socket.id + " in connections:" + connections);
       }
       else{
-        log("[message]The sink is not allowed to send command, allowed operations:",
+        log("[message]The sink is not allowed to send command, allowed operations:"+
                  socket[CONNECTION_CONST.details][MESSAGE_CONST.allowed_operations]);
       } 
     
@@ -290,13 +294,17 @@ io.of(nsp).on(CLIENT_CONST.connect, function (socket) {
       for(var _sinkid in sinks){
           sinks[_sinkid].send(_msgToSink);
       }      
-      log("Source: ", socket.id, " disconnected, removed from lists");  
+      log("[disconnect] source: "+ socket.id+ " disconnected, removed from sources list");  
     }
     else if(sinks.hasOwnProperty(socket.id)){
+      log("[disconnect] sink: "+ socket.id+ " disconnected, removed from sinks list");    
       var _sourceConnectionId = findSource(socket.id, connections);
       //only concern where this sink belongs to a connection
       if(_sourceConnectionId){
-        var indexPosition = removeElementFromArray(socket.id, connections[_sourceConnectionId]);    
+        log("[disconnect] this sink is in a connection, source:", _sourceConnectionId);
+        var indexPosition = removeElementFromArray(socket.id, connections[_sourceConnectionId]);  
+        log("[disconnect] indexPosition:", indexPosition);
+          
         //the first position
         if(indexPosition === 0 && connections[_sourceConnectionId].length > 0){
           //notify the first sink that it now have the write permission
@@ -304,14 +312,20 @@ io.of(nsp).on(CLIENT_CONST.connect, function (socket) {
           var _allowedOpts = _newFirstSink[CONNECTION_CONST.details][MESSAGE_CONST.allowed_operations];
            // add w into it 
           _allowedOpts = _allowedOpts.concat(MESSAGE_CONST.write);
-          _newFirstSink.send({messagetype:SERVER_CONST.permission_changed, allowed_operations: _allowedOpts});
+          _newFirstSink.send({messagetype:SERVER_CONST.permission_changed, allowedoperations: _allowedOpts});
           _newFirstSink[CONNECTION_CONST.details][MESSAGE_CONST.allowed_operations] = _allowedOpts;
+          log("[disconnect] sink removed is the first sink, assign new writing sink")
         }
         else if(connections[_sourceConnectionId].length == 0){
           // this source runs out of sink
-          sources[_sourceConnectionId].send({messagetype: SERVER_CONST.sinkdisconnect});
+          sources[_sourceConnectionId].send({messagetype: SERVER_CONST.sink_disconnect});
+          log("[disconnect] this source is out of sink")
         }
       }
+      else
+        log("[disconnect] this sink is not in any connection");
+      //remove from sink
+      delete sinks[socket.id];
     }
   });
 
@@ -328,7 +342,7 @@ io.of(nsp).on(CLIENT_CONST.connect, function (socket) {
 
 
 server.listen(port, function() {
-  log('Socket.IO server listening on port', port);
+  log('[listen] Socket.IO server listening on port:'+ port + ' nsp:' + nsp);
 });
 
 
@@ -347,7 +361,7 @@ function prepareSourcesList(_sourceList)
     var _details = _sourceList[_sid].details;
     var _presentingDetails = {};
     for (var key in _details) {
-      if(key != CONNECTION_CONST.username && key != CONNECTION_CONST.password && key != CONNECTION_CONST.clienttype)
+      if(key != CONNECTION_CONST.password && key != CONNECTION_CONST.clienttype)
         _presentingDetails[key] = _details[key];           
     }//end inner for
     _sources[_sid] = _presentingDetails;
@@ -381,14 +395,9 @@ function findSource(_sinkid, _connectionList){
 * return the index whether the value was
 */
 function removeElementFromArray(elementVal, array){
-  var count =0;
-  for(var _element in array){
-    if(_element === elementVal)
-      array.splice(count, 1);
-    else
-      count++;
-  }
-  return count;
+  for(var i=0; i< array.length&& array[i]!==elementVal ; i++) {}
+  if( i < array.length ) array.splice(i, 1);
+  return i;
 }
 
 /**

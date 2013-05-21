@@ -22,6 +22,7 @@ public class SocketIOSink{
 
 	private Socket socket; 
 	public boolean isAuthcated = false;
+	public boolean doneSelected = false;
 	public SocketIOSink(){
 		try{
 		String contentsSoFar = "";
@@ -58,20 +59,9 @@ public class SocketIOSink{
      		  System.out.println("message:" + args[0].toString());
 		  	JsonObject obj = (JsonObject)args[0];
 		  	String msgCode = obj.get("messagetype").getAsString() ;
-	  	if(msgCode.equals(TestConsts.SERVER_E_AUTH_RETURN)){
+	  		if(msgCode.equals(TestConsts.SERVER_E_AUTH_RETURN)){
 		  		System.out.println("Authentication return");
-		  		try {
-			    	String source = null;
-			    	System.out.print("source: ");
-			    	BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-					source = br.readLine();
-					socket.emit(TestConsts.CLIENT_E_SELECT, source);
-					isAuthcated = true;
-
-			    } catch (IOException ioe) {
-			        System.out.println("IO error trying to read your name!");
-			        System.exit(1);
-			    }
+		  		isAuthcated = true;
 		  	}
 		  	else if(msgCode.equals(TestConsts.SERVER_E_SOURCE_DISCONNECT)){
 		  		System.out.println("source disconnect, no more source");
@@ -81,6 +71,10 @@ public class SocketIOSink{
 		  	}
 		  	else if(msgCode.equals(TestConsts.SERVER_E_SOURCE_CONNECT)){
 		  		System.out.println("source connect, list of sources:" + obj.get("sourcelist").toString());
+		  	}
+		  	else if(msgCode.equals(TestConsts.SERVER_E_CONNECTION_ESTABLISHED)){
+		  		doneSelected = true;
+		  		System.out.println("Connection established permission:" + obj.get("allowedoperations").toString());
 		  	}
 
 		  }
@@ -117,6 +111,9 @@ public class SocketIOSink{
 		jObject.addProperty("datatype", "image");
 		socket.emit(TestConsts.CLIENT_E_MESSAGE, jObject);
 	}
+	public void emit(String code, Object contents){
+		socket.emit(code, contents);
+	}
 
 	//just main
 	public static void main(String[] args) throws Exception{
@@ -128,7 +125,25 @@ public class SocketIOSink{
 			}
 			catch(Exception e){}
 		}
-			
+		if(!sChat.doneSelected){
+			try {
+		    	String source = null;
+		    	System.out.print("source: ");
+		    	BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+				source = br.readLine();
+				sChat.emit(TestConsts.CLIENT_E_SELECT, source);
+			} catch (IOException ioe) {
+		        System.out.println("IO error trying to read your name!");
+		        System.exit(1);
+		    }
+		}
+		while(!sChat.doneSelected){
+			try{
+				Thread.sleep(600);
+			}
+			catch(Exception e){}
+		}
+
 		try {
 	    	String msg = "";
 			while(!msg.equals("q")){
@@ -136,6 +151,9 @@ public class SocketIOSink{
 	    		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 				msg = br.readLine();
 				sChat.send(msg);	
+				/*
+				image test is fine
+				test with small image and large image
 				System.out.println("Enter an image path:");
 				msg = br.readLine();
 				System.out.println("Enter an image type:");
@@ -144,7 +162,7 @@ public class SocketIOSink{
 			    ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			    ImageIO.write(image, imageType, baos);
 			    String imageContent = Base64.encodeToString(baos.toByteArray(), false);
-			    sChat.sendImg(imageContent);
+			    sChat.sendImg(imageContent);*/
 			}	
 	    } catch (IOException ioe) {
 	        System.out.println("IO error trying to read your name!");
