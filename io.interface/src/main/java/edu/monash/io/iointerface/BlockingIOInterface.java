@@ -1,4 +1,4 @@
-package io.interfaces;
+package edu.monash.io;
 
 /**
 * @Author: Hoang Anh Nguyen
