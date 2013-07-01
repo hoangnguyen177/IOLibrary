@@ -1,0 +1,54 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <parent>
+     <groupId>edu.monash.io</groupId>
+     <artifactId>IOLibrary</artifactId>
+     <version>0.0.1</version>
+  </parent>
+
+
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>edu.monash.io</groupId>
+  <artifactId>IOInterface</artifactId>
+  <packaging>jar</packaging>
+  <version>0.0.1</version>
+  <name>IOInterface</name>
+  <url>http://maven.apache.org</url>
+
+
+  <dependencies>
+    <dependency>
+      <groupId>edu.monash.io</groupId>
+      <artifactId>SocketIOConnection</artifactId>
+      <version>0.0.1</version>
+    </dependency>
+    <dependency>
+    <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>2.2.4</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.6.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>jcl-over-slf4j</artifactId>
+      <version>1.6.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <version>1.6.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-context</artifactId>
+      <version>2.0.8</version>
+    </dependency>
+  </dependencies>
+
+</project>

@@ -8,13 +8,12 @@
   </parent>
 
 
-
   <modelVersion>4.0.0</modelVersion>
   <groupId>edu.monash.io</groupId>
-  <artifactId>SocketIOClient</artifactId>
+  <artifactId>SocketIOConnection</artifactId>
   <packaging>jar</packaging>
   <version>0.0.1</version>
-  <name>SocketIOClient</name>
+  <name>SocketIOConnection</name>
   <url>http://maven.apache.org</url>
 
 
@@ -29,6 +28,21 @@
       <artifactId>gson</artifactId>
       <version>2.2.4</version>
       <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.6.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>jcl-over-slf4j</artifactId>
+      <version>1.6.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <version>1.6.1</version>
     </dependency>
   </dependencies>
 

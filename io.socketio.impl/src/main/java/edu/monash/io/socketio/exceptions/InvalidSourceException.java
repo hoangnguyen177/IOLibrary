@@ -1,20 +1,19 @@
 package edu.monash.io.socketio.exceptions;
 /**
- * InvalidMessageException
+ * InvalidSourceException
  * @author hoangnguyen
- * Throw this message when there is something wrong with the format of the message received/created
  */
-public class InvalidMessageException extends Exception{
+public class InvalidSourceException extends Exception{
 	private static final long serialVersionUID = 1L;
 	
 	/**
 	 * constructor
 	 */
-	public InvalidMessageException(){
+	public InvalidSourceException(){
 		super();
 	}
 	
-	public InvalidMessageException(String message){
+	public InvalidSourceException(String message){
 		super(message);
 	}
 	

@@ -4,17 +4,17 @@ package edu.monash.io.socketio.exceptions;
  * @author hoangnguyen
  * Throw this message when there is something wrong with the format of the message received/created
  */
-public class InvalidMessageException extends Exception{
+public class UnauthcatedClientException extends Exception{
 	private static final long serialVersionUID = 1L;
 	
 	/**
 	 * constructor
 	 */
-	public InvalidMessageException(){
+	public UnauthcatedClientException(){
 		super();
 	}
 	
-	public InvalidMessageException(String message){
+	public UnauthcatedClientException(String message){
 		super(message);
 	}
 	

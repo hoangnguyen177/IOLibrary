@@ -1,0 +1,209 @@
+1. purpose:
+-----------
+- define the structure of the the definition
+- this definition file can be parsed and automatic client can be generated.
+
+2. structure:
+-------------
+
+These are the old definition structures from the previous works - cost me a year :-| 
+
+{
+        "actor": "ImageInOutActor",
+        operations:
+        [
+                {
+                        "operation_name": "intoutactor",
+                        "operation": "inout",
+                        "input_type": "string",
+                        "prompt": "Choose an area in the image",
+                        "output_type": "binary",
+                        "display_type": "image",
+                        "action": "subarea",
+                        "wait_client": true,
+                        "wait_for_input": true,
+                }
+        ]
+}
+
+
+{
+        actor: "textinputactor",
+        comment: "well anything here it is ignored anyway",
+        operations:
+        [
+                {
+                        operation_name: "",
+                        operation: "input",
+                        input_type: "string",
+                        prompt: "what is this value",
+                        group: "otheractor.input",
+                }
+        ]
+}
+
+
+{
+        comment: "This is the comment",
+        actor: "outputactor",
+        operations:[
+                {
+                        operation_name: "",
+                        operation: "output",
+                        output_type: "binary",
+                        display_type: "image",
+                        comment: "or string",
+                        group: "all",
+                        comment: "or otheractor.output"
+                }
+        ]
+}
+
+
+
+Proposal:
+---------
+- anything starts with comment is ignored
+- or starts with //
+
+keys (or labels):
+================
+container level:
+----------------
+- container: program name or workflow name
+- layout: layout of the component. Note that the layout of sub component can override the upper one
+
+a container can have more than one component
+
+component level:
+---------------
+- operations: list of operations (intput, outputs, inouts)
+
+operation level:
+----------------
+- about: contains information about this operation - labels, description, hint, etc
+- optype: type of operations, either input/output/inout
+- type: boolean/int/double/string/image/choice/graph
+For each type, there are different keys associated with it.
+
+// each of these will serve as a program / or workflow
+{ 
+	//container id must be unique for each user								
+	container: container id 												KEY
+	//configuration for this 
+	configuration: {
+		connection:{
+			type: socketio,
+			host: "localhost",
+			port: 8080,
+			username: blah,
+			pass: blah,
+		}
+	}
+	layout: type of layout 													KEY	
+	// actor name for instance, must be unique
+	componentid:{															NON-KEY		
+		//name of the operations
+		input1:{															NON-KEY
+			about:{															KEY
+				label: label here,											KEY
+				description: description here,								KEY	
+				hint: hint here,											KEY	
+			},
+			optype: input,													KEY
+			type: choice, 													KEY
+			options: [
+				about:{label: l1, description: d1}, about:{label: l2, description: d2}
+			]		
+		}, 
+
+	}
+}
+
+
+to access value from library: io.get("componentid.input1") ---> return value
+
+
+Alternatives:
+-------------
+
+
+for each actor - declared from IOActor
+{
+	// note that not all actor need to define container
+	// if more than one definition of the same containerID
+	// either throw errors or overwrite it
+	containerID:{
+		containerid: anotherid, 						// or null if root, atm only one level
+		name: someWorkflow,	//name can be componentid
+		author: blah,
+		date: blah,
+		layout: blah,
+		type: container,													type, container are Keys
+	}, 
+	componentid:{															NON-KEY		
+		//name of the operations, unique in each component
+		type: component, 													type, component are KEYs
+		configuration:{
+			type: socketio,
+			host:"localhost",
+			port: 8080,
+			username: blah,
+			pass: blah,
+		}, 
+		//
+		// this configuraiton can refer to a config object declared elsewhere
+		// for instance
+		// configuration: configId,
+		// and then
+		// configId:{ connection: { .... }}
+		//
+		//name of the container this belongs to
+		// this containerID will then be used to define the layout
+		containerid: containerID,
+		//listen to this for data
+		// if its input / inout
+		input1:{															NON-KEY
+			type: input,													KEY
+			about:{															KEY
+				label: label here,											KEY
+				description: description here,								KEY	
+				hint: hint here,											KEY	
+			},
+			//only one per input/output
+			input: {
+				type: choice, 													KEY
+				options: [
+					about:{label: l1, description: d1}, about:{label: l2, description: d2}
+				],
+				data: int/string/object	//data type for the operation
+			}					
+		}, 
+
+	}
+}
+
+
+
+if output
+
+output:{
+	type: xy_graph,
+	append: true, //false means overwrite
+	data: int/double/tuple
+}
+- about: contains information about this operation - labels, description, hint, etc
+- optype: type of operations, either input/output/inout
+- type: boolean/int/double/string/image/choice/graph
+For each type, there are different keys associated with it.
+
+
+
+Component is a container, which is IO-able.
+Container is just a holder to another container.	---> this is too complex
+	
+	
+	
+
+
+

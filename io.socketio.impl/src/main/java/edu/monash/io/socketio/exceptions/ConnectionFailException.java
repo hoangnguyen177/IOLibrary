@@ -1,20 +1,19 @@
 package edu.monash.io.socketio.exceptions;
 /**
- * InvalidMessageException
+ * ConnectionFailException
  * @author hoangnguyen
- * Throw this message when there is something wrong with the format of the message received/created
  */
-public class InvalidMessageException extends Exception{
+public class ConnectionFailException extends Exception{
 	private static final long serialVersionUID = 1L;
 	
 	/**
 	 * constructor
 	 */
-	public InvalidMessageException(){
+	public ConnectionFailException(){
 		super();
 	}
 	
-	public InvalidMessageException(String message){
+	public ConnectionFailException(String message){
 		super(message);
 	}
 	

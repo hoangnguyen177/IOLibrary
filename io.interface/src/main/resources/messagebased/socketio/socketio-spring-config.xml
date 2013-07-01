@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                           http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+  <bean id="blockingio"
+        class="edu.monash.io.messagebased.socketio.source.BlockingIO"
+        scope="prototype"/>
+  <bean id="nonblockingio"
+        class="edu.monash.io.messagebased.socketio.source.NonBlockingIO"
+        scope="prototype" />
+  <bean id="impdeclaration"
+        class="edu.monash.io.messagebased.socketio.source.SocketIOImpDeclaration"
+        scope="prototype" />
+
+</beans>

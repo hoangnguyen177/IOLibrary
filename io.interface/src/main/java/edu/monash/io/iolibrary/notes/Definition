@@ -1,0 +1,63 @@
+for each actor/program - declared from IOActor
+{
+	// note that not all actor need to define container
+	// if more than one definition of the same containerID
+	// either throw errors or overwrite it
+	containerID:{
+		about:{
+			title: some title,
+			description: some desc,
+			hint: some hint,
+			author: blah,
+			date: blah,
+		},
+		shared: true, //default is false, share the IO connection
+		layout: horizontal,
+		type: container,													type, container are Keys
+	}, 
+	channelid:{															NON-KEY		
+		//name of the operations, unique in each channel
+		type: channel, 
+		about:{															
+				label: label here,											
+				description: description here,									
+				hint: hint here,												
+		},
+		configuration:{
+			type: socketio,
+			host:"localhost",
+			port: 8080,
+			username: blah,
+			pass: blah,
+		}, 
+		//
+		// this configuraiton can refer to a config object declared elsewhere
+		// for instance
+		// configuration: configId,
+		// and then
+		// configId:{ connection: { .... }}
+		//
+		//name of the container this belongs to
+		// this containerID will then be used to define the layout
+		containerid: containerID,
+		layout: vertical, //default
+		//listen to this for data
+		// if its input / inout
+		input1:{															NON-KEY
+			type: input,													KEY
+			about:{															KEY
+				label: label here,											KEY
+				description: description here,								KEY	
+				hint: hint here,											KEY	
+			},
+			in_datatype: int/string/object,
+			out_datatype: int/string/object,
+			guielement: choice,
+			data:[about: {label, l1, description: d1}]
+		}, 
+
+	}
+}
+
+
+
