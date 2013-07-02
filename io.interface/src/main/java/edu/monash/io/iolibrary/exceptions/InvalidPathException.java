@@ -6,7 +6,7 @@ package edu.monash.io.iolibrary.exceptions;
  * throw this one when the path is invalid
  */
 
-public class InvalidPathException extends Exceptions{
+public class InvalidPathException extends Exception{
 
 	private static final long serialVersionUID = 1L;
 	/**

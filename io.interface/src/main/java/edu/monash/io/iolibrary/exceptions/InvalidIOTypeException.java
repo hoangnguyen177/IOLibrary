@@ -6,7 +6,7 @@ package edu.monash.io.iolibrary.exceptions;
  * throw this one when the IO type is invalid
  */
 
-public class InvalidIOTypeException extends Exceptions{
+public class InvalidIOTypeException extends Exception{
 
 	private static final long serialVersionUID = 1L;
 	/**

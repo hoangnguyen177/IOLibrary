@@ -1,8 +1,16 @@
 package edu.monash.io.iolibrary.ioobjects;
+//java
+import java.util.Map;
+import java.util.Set;
+import java.util.Iterator;
 
+//gson
+import com.google.gson.JsonObject;
+import com.google.gson.JsonElement;
 //IO Library
 import edu.monash.io.iolibrary.exceptions.InvalidDefinitionException;
 import edu.monash.io.iolibrary.exceptions.InvalidDataTypeException;
+import edu.monash.io.iolibrary.exceptions.InvalidIOTypeException;
 import edu.monash.io.iolibrary.ConfigurationConsts.DataType;
 import static edu.monash.io.iolibrary.ConfigurationConsts.TYPE;
 import edu.monash.io.iolibrary.ConfigurationConsts.IoType;
@@ -18,8 +26,8 @@ import static edu.monash.io.iolibrary.ConfigurationConsts.NAME;
 public class IOVariable extends IOObject{
 
 	public IOVariable(){
-		inputDataType = "";
-		outputDataType = "";
+		inputDataType = DataType.STRING;
+		outputDataType = DataType.STRING;
 		guiElement = "";
 		data = null;
 	}
@@ -47,7 +55,7 @@ public class IOVariable extends IOObject{
 		JsonObject _obj = super.getObject();
 		_obj.addProperty(IN_DATA_TYPE, inputDataType.toString());
 		_obj.addProperty(OUT_DATA_TYPE, outputDataType.toString());
-		_obj.addProperty(DATA, data);
+		_obj.add(DATA, data);
 		return _obj;	
 	}
 
@@ -67,7 +75,7 @@ public class IOVariable extends IOObject{
 	// 		guielement: choice,
 	// 		data:[about: {label, l1, description: d1}]
 	// 	}, 
-	public static IOVariable parseIOVariable(JsonObjet variableContents) throws InvalidDefinitionException, 
+	public static IOVariable parseIOVariable(JsonObject variableContents) throws InvalidDefinitionException, 
 																		InvalidDataTypeException, InvalidIOTypeException
 	{
 		if(variableContents==null)
@@ -80,17 +88,17 @@ public class IOVariable extends IOObject{
 			String _key = entry.getKey();
 			JsonElement _value = entry.getValue();
 			//now check the key: type, about, int_datatype, out_datatype and data
-			if(TYPE.equals(key))
-				_variable.setType(IOType.fromString(_value.getAsString()).toString());
-			else if(ABOUT.equals(key))
+			if(TYPE.equals(_key))
+				_variable.setType(IoType.fromString(_value.getAsString()).toString());
+			else if(ABOUT.equals(_key))
 				_variable.setInfo(_value.getAsJsonObject());
-			else if(NAME.equals(key))
-				_variable.setName(_value.getAsJsonObject());
-			else if(IN_DATA_TYPE.equals(key))
+			else if(NAME.equals(_key))
+				_variable.setName(_value.getAsString());
+			else if(IN_DATA_TYPE.equals(_key))
 				_variable.setInputDataType(DataType.fromString(_value.getAsString()));
-			else if(OUT_DATA_TYPE.equals(key))
+			else if(OUT_DATA_TYPE.equals(_key))
 				_variable.setOutputDataType(DataType.fromString(_value.getAsString()));
-			else if(DATA.equals(key))
+			else if(DATA.equals(_key))
 				_variable.setData(_value.getAsJsonObject());	
 		}
 		return _variable;
@@ -106,5 +114,5 @@ public class IOVariable extends IOObject{
 	private String guiElement;
 	//data
 	// not sure whether this is the right decision
-	private JsonObjet data;
+	private JsonObject data;
 }

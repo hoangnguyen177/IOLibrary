@@ -3,16 +3,21 @@ package edu.monash.io.iolibrary.ioobjects;
 //java
 import java.util.Map;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Set;
+import java.util.Iterator;
 
 //Json
 import com.google.gson.JsonObject;
-
+import com.google.gson.JsonElement;
 //IO library
-import edu.monash.io.iolibrary.ioobjects.BlockingIOInterface;
-import edu.monash.io.iolibrary.ioobjects.NonBlockingIOInterface;
+import edu.monash.io.iolibrary.iointerface.BlockingIOInterface;
+import edu.monash.io.iolibrary.iointerface.NonBlockingIOInterface;
 import edu.monash.io.iolibrary.exceptions.InvalidDefinitionException;
 import edu.monash.io.iolibrary.exceptions.InvalidDataTypeException;
 import edu.monash.io.iolibrary.exceptions.InvalidIOTypeException;
+import edu.monash.io.iolibrary.exceptions.NotSupportException;
+import edu.monash.io.iolibrary.exceptions.InvalidPathException;
 import static edu.monash.io.iolibrary.ConfigurationConsts.TYPE_CONTAINER;
 import static edu.monash.io.iolibrary.ConfigurationConsts.SHARED_IO;
 import static edu.monash.io.iolibrary.ConfigurationConsts.LAYOUT;
@@ -89,7 +94,7 @@ public class IOContainer extends IOObject{
 			throw new InvalidPathException(path + " is not a valid path");
 		String _channelid = path.substring(0, firstDotPosition-1);
 		if(channels.containsKey(_channelid))
-			return channels.get(_channelid).getBlockingIOInterface(this.sharedIo());
+			return channels.get(_channelid).getBlockingIO(this.sharedIo());
 		else
 			throw new InvalidPathException("There is no channel:" + _channelid);
 	}	
@@ -103,7 +108,7 @@ public class IOContainer extends IOObject{
 			throw new InvalidPathException(path + " is not a valid path");
 		String _channelid = path.substring(0, firstDotPosition-1);
 		if(channels.containsKey(_channelid))
-			return channels.get(_channelid).getNonBlockingIOInterface(this.sharedIo());
+			return channels.get(_channelid).getNonBlockingIO(this.sharedIo());
 		else
 			throw new InvalidPathException("There is no channel:" + _channelid);
 	}
@@ -136,15 +141,15 @@ public class IOContainer extends IOObject{
 			Map.Entry<String, JsonElement> entry = _iterator.next();
 			String _key = entry.getKey();
 			JsonElement _value = entry.getValue();
-			if(TYPE.equals(key)){
+			if(TYPE.equals(_key)){
 			}
-			else if(ABOUT.equals(key))
+			else if(ABOUT.equals(_key))
 				_container.setInfo(_value.getAsJsonObject());
-			else if(LAYOUT.equals(key))
+			else if(LAYOUT.equals(_key))
 				_container.setLayout(_value.getAsString());
-			else if(SHARED_IO.equals(key))
+			else if(SHARED_IO.equals(_key))
 				_container.setSharedIO(Boolean.parseBoolean(_value.getAsString()));
-			else if(NAME.equals(key))
+			else if(NAME.equals(_key))
 				_container.setName(_value.getAsString());
 		}
 		return _container;

@@ -6,7 +6,7 @@ package edu.monash.io.iolibrary.exceptions;
  * Throws this exception when the type if IO requested is not supported
  */
 
-public class NotSupportException extends Exceptions{
+public class NotSupportException extends Exception{
 
 	private static final long serialVersionUID = 1L;
 	/**

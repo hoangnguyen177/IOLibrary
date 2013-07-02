@@ -4,6 +4,8 @@ package edu.monash.io.iolibrary;
 * class DataHandler
 * Will need to modify this one for call back
 */
+import com.google.gson.JsonObject;
+
 public class DataHandler{
 	// //path to listen to 
 	// private String path;
@@ -20,6 +22,6 @@ public class DataHandler{
 	// called when receiving a string
 	public void 	onString	(String str)	{}
 	//called when receiving an object, which is non of previous types
-	public void 	onObject	(Object obj)	{}
+	public void 	onObject	(JsonObject obj)	{}
 
 }

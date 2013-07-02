@@ -6,7 +6,7 @@ package edu.monash.io.iolibrary.iointerface.exceptions;
  * throw this one when smth is wrong wiht IO
  */
 
-public class IOFailException extends Exceptions{
+public class IOFailException extends Exception{
 
 	private static final long serialVersionUID = 1L;
 	/**

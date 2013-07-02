@@ -6,7 +6,7 @@ package edu.monash.io.iolibrary.exceptions;
  * Throw this message when the path given is not unique
  */
 
-public class NonUniquePathException extends Exceptions{
+public class NonUniquePathException extends Exception{
 
 	private static final long serialVersionUID = 1L;
 	/**

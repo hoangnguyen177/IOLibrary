@@ -1,23 +1,26 @@
 package edu.monash.io.iolibrary;
-
-
+//gson
+import com.google.gson.JsonObject;
 //IO library
 import edu.monash.io.iolibrary.exceptions.InvalidPathException;
 import edu.monash.io.iolibrary.exceptions.NotSupportException;
 import edu.monash.io.iolibrary.iointerface.exceptions.IOFailException;
+import edu.monash.io.iolibrary.ioobjects.IOObjectsManager;
 /**
 * @author Hoang Nguyen
 * Non Blocking class: expose io functaionlities of the library
 */
 public class NonBlockingIO extends IO{
-	
+	public NonBlockingIO(IOObjectsManager _objects){
+		super(_objects);
+	}
 	/*put value to specified path*/
-	public void put(String path, Object value, boolean append) throws InvalidPathException, NotSupportException, IOFailException{
+	public void put(String path, JsonObject value, boolean append) throws InvalidPathException, NotSupportException, IOFailException{
 		this.getIOObjects().put(path, value, append, false);
 	}
 
 	/*overwrite value to specified path*/
-	public void put(String path, Object value) throws InvalidPathException, NotSupportException, IOFailException{
+	public void put(String path, JsonObject value) throws InvalidPathException, NotSupportException, IOFailException{
 		this.put(path, value, false);	
 	}
 
@@ -32,14 +35,22 @@ public class NonBlockingIO extends IO{
 	}
 
 	/*put a file to specified path*/
-	public void putFile(String path, String filename, boolean append) throws InvalidPathException, NotSupportException, IOFailException{
-		this.getIOObjects().putFile(path, value, append, false);
+	public void putTextFile(String path, String filename, boolean append) throws InvalidPathException, NotSupportException, IOFailException{
+		this.getIOObjects().putTextFile(path, filename, append, true);
+	}
+
+	public void putBinaryFile(String path, String filename, boolean append) throws InvalidPathException, NotSupportException, IOFailException{
+		this.getIOObjects().putBinaryFile(path, filename, append, true);
 	}
 
 	/*put a file to specified path*/
-	public void putFile(String path, String filename) throws InvalidPathException, NotSupportException, IOFailException{
-		this.putFile(path, filename, false);
+	public void putTextFile(String path, String filename) throws InvalidPathException, NotSupportException, IOFailException{
+		this.putTextFile(path, filename, false);
 	}
+
+	public void putBinaryFile(String path, String filename) throws InvalidPathException, NotSupportException, IOFailException{
+		this.putBinaryFile(path, filename, false);
+	}	
 
 
 	/*add handler so that it can be called back, note if wrong handler, string is return*/

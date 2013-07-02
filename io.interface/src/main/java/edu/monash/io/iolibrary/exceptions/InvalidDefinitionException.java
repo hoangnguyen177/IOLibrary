@@ -6,7 +6,7 @@ package edu.monash.io.iolibrary.exceptions;
  * THrows this one when the definition is invalid
  */
 
-public class InvalidDefinitionException extends Exceptions{
+public class InvalidDefinitionException extends Exception{
 
 	private static final long serialVersionUID = 1L;
 	/**

@@ -1,4 +1,4 @@
-package edu.monash.io.iolibrary;
+package edu.monash.io.iolibrary.ioobjects;
 
 
 //java
@@ -16,8 +16,17 @@ import com.google.gson.JsonSyntaxException;
 
 //IOLibrary
 import edu.monash.io.iolibrary.exceptions.InvalidDefinitionException;
+import edu.monash.io.iolibrary.exceptions.InvalidDataTypeException;
+import edu.monash.io.iolibrary.exceptions.InvalidIOTypeException;
+import edu.monash.io.iolibrary.exceptions.NotSupportException;
+import edu.monash.io.iolibrary.exceptions.InvalidPathException;
+import edu.monash.io.iolibrary.DataHandler;
+
+import edu.monash.io.iolibrary.iointerface.IOFactory;
+import edu.monash.io.iolibrary.iointerface.IOInterface;
 import edu.monash.io.iolibrary.iointerface.BlockingIOInterface;
 import edu.monash.io.iolibrary.iointerface.NonBlockingIOInterface;
+import edu.monash.io.iolibrary.iointerface.exceptions.IOFailException;
 
 
 import static edu.monash.io.iolibrary.ConfigurationConsts.TYPE;
@@ -31,8 +40,7 @@ public class IOObjectsManager{
 	/**
 	 * constructors
 	 */
-	public IOObjectsManager(String _definition) throws InvalidDefinitionException, 
-											InvalidDataTypeException, InvalidIOTypeException
+	public IOObjectsManager(String _definition) throws InvalidDefinitionException, IOFailException
 	{
 		try{
             JsonParser parser = new JsonParser();
@@ -45,6 +53,12 @@ public class IOObjectsManager{
 		}
         catch(JsonSyntaxException e){
             throw new InvalidDefinitionException(e.getMessage());
+        }
+        catch(InvalidDataTypeException e){
+        	throw new InvalidDefinitionException(e.getMessage());
+        }
+        catch(InvalidIOTypeException e){
+        	throw new InvalidDefinitionException(e.getMessage());
         }
 	}
 
@@ -59,14 +73,14 @@ public class IOObjectsManager{
 	* whether support blocking
 	*/
 	public boolean supportBlocking(){
-		return IOFactory.supportBlockingIO();
+		return IOFactory.getInstance().supportBlockingIO();
 	}
 
 	/**
 	* whether support non blocking
 	*/
 	public boolean supportNonBlocking(){
-		return IOFactory.supportNonBlockingIO();
+		return IOFactory.getInstance().supportNonBlockingIO();
 	}
 
 	/**
@@ -104,7 +118,7 @@ public class IOObjectsManager{
 	/////////////////////////////////////////////////////////////
 	//io variables
 	/*put value to specified path*/
-	public void put(String path, Object value, boolean append, boolean blocking) throws InvalidPathException, 
+	public void put(String path, JsonObject value, boolean append, boolean blocking) throws InvalidPathException, 
 																NotSupportException, IOFailException
 	{
 		IOInterface _ioInterface = null;
@@ -132,7 +146,7 @@ public class IOObjectsManager{
 	}																
 
 	/*put a file to specified path*/
-	public void putFile(String path, String filename, boolean append, boolean blocking) throws InvalidPathException, 
+	public void putTextFile(String path, String filename, boolean append, boolean blocking) throws InvalidPathException, 
 																		NotSupportException, IOFailException
 	{
 		IOInterface _ioInterface = null;
@@ -142,8 +156,25 @@ public class IOObjectsManager{
 			_ioInterface= this.getNonBlockingIOInterface(path);
 		if(_ioInterface==null)
 			throw new IOFailException("cannot get the IO interface. Something goes wrong");
-		_ioInterface.putFile(path, value, append);
+		_ioInterface.putTextFile(path, filename, append);
 	}
+
+
+	/*put a binary file to specified path*/
+	public void putBinaryFile(String path, String filename, boolean append, boolean blocking) throws InvalidPathException, 
+																		NotSupportException, IOFailException
+	{
+		IOInterface _ioInterface = null;
+		if(blocking)
+			_ioInterface= this.getBlockingIOInterface(path);
+		else
+			_ioInterface= this.getNonBlockingIOInterface(path);
+		if(_ioInterface==null)
+			throw new IOFailException("cannot get the IO interface. Something goes wrong");
+		_ioInterface.putBinaryFile(path, filename, append);
+	}
+
+
 
 	//// NON BLOCKING
 	/*non blocking way to receive data*/
@@ -178,7 +209,7 @@ public class IOObjectsManager{
 	}
 	
 	/*get an object*/
-	public Object getObject(String path) throws InvalidPathException, NotSupportException, IOFailException{
+	public JsonObject getObject(String path) throws InvalidPathException, NotSupportException, IOFailException{
 		BlockingIOInterface _blocking = this.getBlockingIOInterface(path);
 		return _blocking.getObject(path);
 	}
@@ -192,7 +223,7 @@ public class IOObjectsManager{
 	* from the definition, assume its not null,
 	* pass it to components and containers
 	*/
-	private void processDefinition() throws InvalidDefinitionException, 
+	private void processDefinition() throws InvalidDefinitionException, IOFailException,
 											InvalidDataTypeException, InvalidIOTypeException
 	{
 		//assume that the definition is not null
@@ -203,7 +234,7 @@ public class IOObjectsManager{
 			String _key = entry.getKey();
 			JsonObject _value = entry.getValue().getAsJsonObject();
 			//get the type
-			String _itemType = _value().get(TYPE).getAsString();
+			String _itemType = _value.get(TYPE).getAsString();
 			if(TYPE_CONTAINER.equals(_itemType)){
 				//a container
 				//add to container list
@@ -215,7 +246,7 @@ public class IOObjectsManager{
 				containers.put(_key, _aContainer);	
 			}
 			else if(TYPE_CHANNEL.equals(_itemType)){
-				IOChannel _aChannel = IOChannel.parseChannel(_value);
+				IOChannel _aChannel = IOChannel.parseIOChannel(_value);
 				_aChannel.setId(_key);
 				String _containerId = _aChannel.getContainerId();
 				if(!containers.containsKey(_containerId)){

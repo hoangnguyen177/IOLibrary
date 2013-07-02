@@ -76,7 +76,11 @@ public abstract class Connection{
 	public String 			getProtocol		() 									{ return protocol; 				}	 					
 	//port
 	public void 			setPort			(int _port) 						{ port = _port; 				}
-	public int 	 			getPort			() 									{ return port;	 				}	 					
+	public int 	 			getPort			() 									{ return port;	 				}	
+	 //time out
+	public void 			setTimeout		(int _timeout) 						{ timeout = _timeout; 			}
+	public int 	 			getTimeout		() 									{ return timeout;				}	
+
 	//auth info
 	public void 			setAuthInfo		(JsonObject _authInfo) 				{ authInfo = _authInfo;			}
 	public JsonObject 		getAuthInfo		() 									{return authInfo;				}

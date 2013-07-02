@@ -9,6 +9,7 @@ import java.util.LinkedList;
 
 //gson
 import com.google.gson.JsonObject;
+import com.google.gson.JsonElement;
 
 //library
 import edu.monash.io.iolibrary.exceptions.InvalidDefinitionException;
@@ -24,15 +25,15 @@ public class ConfigurationHelper{
 	* check the type of the first level objects - do not go furthur down
 	* returns linkedlist of ids with the same type: container, or components
 	*/
-	private LinkedList<String> getFirstLevelObjetsIDs(String _type) throws InvalidDefinitionException{
+	public static LinkedList<String> getFirstLevelObjetsIDs(JsonObject definition, String _type) throws InvalidDefinitionException{
 		if(definition==null)
 			throw new InvalidDefinitionException("Definition is null");
 		LinkedList<String> ids = new LinkedList<String>();
 		//get all the components IDs, and return
 		Set<Map.Entry<String,JsonElement>> _elements = definition.entrySet();
-		Iterator _elementsIterator = _elements.iterator();
+		Iterator<Map.Entry<String, JsonElement>> _elementsIterator = _elements.iterator();
 		while(_elementsIterator.hasNext()){
-			Map.Entry<String, JsonElement> _element = iterator.next();
+			Map.Entry<String, JsonElement> _element = _elementsIterator.next();
 			String _key = _element.getKey(); //this will be added to ids if the type of this object is component
 			JsonElement _value = _element.getValue();
 			if(_value != null&& !_value.isJsonNull()){
@@ -50,7 +51,7 @@ public class ConfigurationHelper{
 	* get the first channel from the definition, in case there are more than one channels in a single defintion file
 	*/
 	public static JsonObject getFirstChannelFromDefinition(JsonObject definition) throws InvalidDefinitionException{
-		LinkedList<String> ids = ConfigurationHelper.getFirstLevelObjetsIDs(TYPE_CHANNEL);
+		LinkedList<String> ids = ConfigurationHelper.getFirstLevelObjetsIDs(definition, TYPE_CHANNEL);
 		if(ids.size()==0)
 			throw new InvalidDefinitionException("Cannot  find any TYPE_CHANNEL in the definition");
 		String _first = ids.getFirst();
@@ -62,8 +63,8 @@ public class ConfigurationHelper{
 	public static JsonObject getConfigFromDefinition(JsonObject definition) throws InvalidDefinitionException{
 		JsonObject channel = ConfigurationHelper.getFirstChannelFromDefinition(definition);
 		JsonElement _configElement = channel.get(CONFIG);
-		if(_configElement == null && !_configElement.isJsonNull())
-			throws InvalidDefinitionException("Cannot find config in the definition");
+		if(_configElement == null || _configElement.isJsonNull())
+			throw new InvalidDefinitionException("Cannot find config in the definition");
 		return _configElement.getAsJsonObject();
 	}
 

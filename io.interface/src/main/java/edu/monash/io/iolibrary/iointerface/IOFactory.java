@@ -13,7 +13,7 @@ import com.google.gson.*;
 //Library
 import edu.monash.io.iolibrary.exceptions.InvalidDefinitionException;
 import edu.monash.io.iolibrary.exceptions.NotSupportException;
-
+import edu.monash.io.iolibrary.iointerface.exceptions.IOFailException;
 /**
 * @Author: Hoang Anh Nguyen
 * @Date:  16 May 2013
@@ -47,7 +47,7 @@ public class IOFactory{
     * register io interface with factory
     * with given path and definition
     */
-    public void registerIO(String path, JsonObject definition) throws InvalidDefinitionException{
+    public void registerIO(String path, JsonObject definition) throws InvalidDefinitionException,IOFailException{
         //blocking map
         if(!blockings.containsKey(path)){
             BlockingIOInterface _blocking = (BlockingIOInterface)appcontext.getBean("blockingio");

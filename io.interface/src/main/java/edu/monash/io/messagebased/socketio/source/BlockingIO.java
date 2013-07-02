@@ -5,24 +5,27 @@ package edu.monash.io.messagebased.socketio.source;
 import java.util.*;
 // import java.util.concurrent.ConcurrentMap;
 // import java.util.concurrent.ConcurrentHashMap;
-
+import java.io.FileNotFoundException;
+import java.io.IOException;
 //gson
 import com.google.gson.*;
 
 // IO library
 import edu.monash.io.iolibrary.iointerface.BlockingIOInterface;
-import edu.monash.io.iolibrary.ConfigurationConst;
-import edu.monash.io.iolibrary.ConfigurationConst.DataType;
+import edu.monash.io.iolibrary.ConfigurationConsts;
+import edu.monash.io.iolibrary.ConfigurationConsts.DataType;
 import edu.monash.io.iolibrary.ConfigurationHelper;
 import edu.monash.misc.FileHelper;
 import edu.monash.io.iolibrary.messagebased.MessageConsts;
-
+import edu.monash.io.iolibrary.exceptions.InvalidDefinitionException;
+import edu.monash.io.iolibrary.iointerface.exceptions.IOFailException;
+import edu.monash.io.iolibrary.exceptions.InvalidDataTypeException;
 //connection
 import edu.monash.io.socketio.connection.*;
 import edu.monash.io.socketio.exceptions.*;
 
-import static edu.monash.io.socketio.ConnectionConsts.CLIENT_C_MESSAGE ;
-import static edu.monash.io.socketio.ConnectionConsts.MESSAGE_C_MESSAGE_CODE ;
+import static edu.monash.io.socketio.connection.ConnectionConsts.CLIENT_C_MESSAGE ;
+import static edu.monash.io.socketio.connection.ConnectionConsts.MESSAGE_C_MESSAGE_CODE ;
 
 public class BlockingIO implements BlockingIOInterface{
 	/*initialise the interface*/
@@ -30,17 +33,17 @@ public class BlockingIO implements BlockingIOInterface{
 		definition = _definition;
 		source = new SourceConnection(); 
 	    JsonObject connectionConfig = ConfigurationHelper.getConfigFromDefinition(definition);
-		if(connectionConfig.has(ConfigurationConst.CONNECTION_HOST))
-			source.setHost(connectionConfig.get(ConfigurationConst.CONNECTION_HOST));
-		if(connectionConfig.has(ConfigurationConst.CONNECTION_PROTOCOL))
-			source.setHost(connectionConfig.get(ConfigurationConst.CONNECTION_PROTOCOL));
-		if(connectionConfig.has(ConfigurationConst.CONNECTION_NSP))
-			source.setHost(connectionConfig.get(ConfigurationConst.CONNECTION_NSP));				
-		if(connectionConfig.has(ConfigurationConst.CONNECTION_PORT))
-			source.setHost(connectionConfig.get(Integer.parseInt(ConfigurationConst.CONNECTION_HOST)));
-		if(connectionConfig.has(ConfigurationConst.CONNECTION_TIMEOUT))
-			source.setHost(connectionConfig.get(Integer.parseInt(ConfigurationConst.CONNECTION_TIMEOUT)));
-		source.setAuthInfo(config.getSourceInfo(_componentId));
+		if(connectionConfig.has(ConfigurationConsts.CONNECTION_HOST))
+			source.setHost(connectionConfig.get(ConfigurationConsts.CONNECTION_HOST).getAsString());
+		if(connectionConfig.has(ConfigurationConsts.CONNECTION_PROTOCOL))
+			source.setProtocol(connectionConfig.get(ConfigurationConsts.CONNECTION_PROTOCOL).getAsString());
+		if(connectionConfig.has(ConfigurationConsts.CONNECTION_NSP))
+			source.setNsp(connectionConfig.get(ConfigurationConsts.CONNECTION_NSP).getAsString());				
+		if(connectionConfig.has(ConfigurationConsts.CONNECTION_PORT))
+			source.setPort(connectionConfig.get(ConfigurationConsts.CONNECTION_HOST).getAsInt());
+		if(connectionConfig.has(ConfigurationConsts.CONNECTION_TIMEOUT))
+			source.setTimeout(connectionConfig.get(ConfigurationConsts.CONNECTION_TIMEOUT).getAsInt());
+		source.setAuthInfo(definition);
 		source.addListener(new SourceListener(){
 			public void onConnectionEstablished(){
 				System.out.println("TestSourceClient:: socket established");
@@ -51,7 +54,7 @@ public class BlockingIO implements BlockingIOInterface{
 			public void onAuthResponse(JsonObject authResponse){
 				System.out.println("TestSourceClient:: auth response:" + authResponse.toString());
 			}
-			public void onMessage(JsonObject aMessage) throws InvalidMessageException{
+			public void onMessage(JsonObject aMessage){
 				System.out.println("TestSourceClient:: new message: " + aMessage.toString());
 				processMessage(aMessage);
 			}	
@@ -92,24 +95,24 @@ public class BlockingIO implements BlockingIOInterface{
 	}
 
 	/*put value to specified path*/
-	public void put(String path, Object value, boolean append) throws IOFailException{
+	public void put(String path, JsonObject value, boolean append) throws IOFailException{
 		//now create the message
 		JsonObject jObject = new JsonObject();
 		//tells server that this is a message
 		jObject.addProperty(MESSAGE_C_MESSAGE_CODE, CLIENT_C_MESSAGE);
 		jObject.addProperty(MessageConsts.PATH , path);
-		jObject.addProperty(MessageConsts.DATA , value);
-		jObject.addProperty(MessageConsts.DATA_TYPE , DataType.OBJECT);
+		jObject.add(MessageConsts.DATA , value);
+		jObject.addProperty(MessageConsts.DATA_TYPE , DataType.OBJECT.toString());
 		jObject.addProperty(MessageConsts.APPEND , append);
 		//add path, value and append
 		try{
-			source.send(message);
+			source.send(jObject);
 		}
 		catch(ConnectionFailException e){
-			throw new IOFailException(e.getMessage);
+			throw new IOFailException(e.getMessage());
 		}
 		catch(UnauthcatedClientException e){
-			throw new IOFailException(e.getMessage);
+			throw new IOFailException(e.getMessage());
 		}
 		
 	}
@@ -123,18 +126,18 @@ public class BlockingIO implements BlockingIOInterface{
 		jObject.addProperty(MESSAGE_C_MESSAGE_CODE, CLIENT_C_MESSAGE);
 		jObject.addProperty(MessageConsts.PATH , path);
 		jObject.addProperty(MessageConsts.DATA , Base64.encodeToString(value, false));
-		jObject.addProperty(MessageConsts.DATA_TYPE , DataType.BYTEARRAY);
+		jObject.addProperty(MessageConsts.DATA_TYPE , DataType.BYTEARRAY.toString());
 		jObject.addProperty(MessageConsts.APPEND , append);
 
 		//add path, value and append
 		try{
-			source.send(message);
+			source.send(jObject);
 		}
 		catch(ConnectionFailException e){
-			throw new IOFailException(e.getMessage);
+			throw new IOFailException(e.getMessage());
 		}
 		catch(UnauthcatedClientException e){
-			throw new IOFailException(e.getMessage);
+			throw new IOFailException(e.getMessage());
 		}		
 	}
 
@@ -144,16 +147,16 @@ public class BlockingIO implements BlockingIOInterface{
 	public void putTextFile(String path, String filename, boolean append) throws IOFailException{
 		//read the file in first
 		try{
-			byte[] contents = FileHelper.readTextFile(filename);
+			String contents = FileHelper.readTextFile(filename);
 			JsonObject jObject = new JsonObject();
 			jObject.addProperty(MESSAGE_C_MESSAGE_CODE, CLIENT_C_MESSAGE);
 			jObject.addProperty(MessageConsts.PATH , path);
-			jObject.addProperty(MessageConsts.DATA , Base64.encodeToString(contents, false));
+			jObject.addProperty(MessageConsts.DATA , contents);
 			jObject.addProperty(MessageConsts.DATA_TYPE , DataType.TEXT.toString());
 			jObject.addProperty(MessageConsts.FILE_NAME, filename);
 			jObject.addProperty(MessageConsts.APPEND , append);
 			//add path, value and append
-			source.send(message);
+			source.send(jObject);
 		}
 		catch(FileNotFoundException e){
 			throw new IOFailException(e.getMessage());
@@ -162,10 +165,10 @@ public class BlockingIO implements BlockingIOInterface{
 			throw new IOFailException(e.getMessage());
 		}
 		catch(ConnectionFailException e){
-			throw new IOFailException(e.getMessage);
+			throw new IOFailException(e.getMessage());
 		}
 		catch(UnauthcatedClientException e){
-			throw new IOFailException(e.getMessage);
+			throw new IOFailException(e.getMessage());
 		}
 
 	}
@@ -182,7 +185,7 @@ public class BlockingIO implements BlockingIOInterface{
 			jObject.addProperty(MessageConsts.FILE_NAME, filename);
 			jObject.addProperty(MessageConsts.APPEND , append);
 			//add path, value and append
-			source.send(message);
+			source.send(jObject);
 		}
 		catch(FileNotFoundException e){
 			throw new IOFailException(e.getMessage());
@@ -191,65 +194,70 @@ public class BlockingIO implements BlockingIOInterface{
 			throw new IOFailException(e.getMessage());
 		}
 		catch(ConnectionFailException e){
-			throw new IOFailException(e.getMessage);
+			throw new IOFailException(e.getMessage());
 		}
 		catch(UnauthcatedClientException e){
-			throw new IOFailException(e.getMessage);
+			throw new IOFailException(e.getMessage());
 		}
 
 	}
 
 	/*retrieve data held at specified path*/
 	public String getString(String path){
-		return get(path).getAsString();
+		return get(path, DataType.STRING).getAsString();
 	}
 
 	/*retrieve double value held at specified path*/
 	public Double getDouble(String path){
-		return get(path).getAsDouble();
+		return get(path, DataType.DOUBLE).getAsDouble();
 	}
 
 	/*retrieve int value at specified path*/
 	public int getInt(String path){
-		return get(path).getAsInt();		
+		return get(path, DataType.INT).getAsInt();		
 	}
 
 	/*boolean*/
 	public boolean getBoolean(String path){
-		return get(path).getAsBoolean();
+		return get(path, DataType.BOOL).getAsBoolean();
 	}	
 	/*get an object*/
-	public Object getObject(String path){
-		return get(path).getAsJsonObject();		
+	public JsonObject getObject(String path){
+		return get(path, DataType.OBJECT).getAsJsonObject();		
 	}
 
 	/**************************************/
-	private synchronized JsonElement get(String path){
+	private synchronized JsonElement get(String path, DataType _dataType){
 		boolean _wait = true;
 		if(messages.containsKey(path)){
 			try{
-				if(DataType.STRING == DataType.fromString(messages.get(path).get(DATA_TYPE).getASString()))
+				DataType _messageType = DataType.fromString(messages.get(path).get(MessageConsts.DATA_TYPE).getAsString());
+				if(_dataType == _messageType)
 					_wait= false;
 			}
 			catch(InvalidDataTypeException e){}
 		}
 		while(_wait){
-			wait();
-			if(messages.containsKey(path)){
 			try{
-				if(DataType.STRING == DataType.fromString(messages.get(path).get(DATA_TYPE).getASString()))
-					_wait= false;
+				wait();
 			}
-			catch(InvalidDataTypeException e){}
+			catch(InterruptedException e){}
+			if(messages.containsKey(path)){
+				try{
+					DataType _messageType = DataType.fromString(messages.get(path).get(MessageConsts.DATA_TYPE).getAsString());
+					if(_dataType == _messageType)
+						_wait= false;
+				}
+				catch(InvalidDataTypeException e){}
 			}
 		}
-		return messages.get(path).get(DATA);
+		return messages.get(path).get(MessageConsts.DATA);
 	}
 	//what to do with the messages
 	private synchronized void processMessage(JsonObject aMessage){
 		String _path = aMessage.get(MessageConsts.PATH).getAsString();
-		if(_path!=null&& !path.isEmpty()){
-			messages.putIfAbsent(_path, aMessage);
+		if(_path!=null&& !_path.isEmpty()){
+			messages.put(_path, aMessage);
 			notify();			
 		}
 	}

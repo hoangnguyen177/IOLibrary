@@ -6,7 +6,7 @@ package edu.monash.io.iolibrary.exceptions;
  * Throw this exception when the definition is not defined
  */
 
-public class DefinitionNotDefinedException extends Exceptions{
+public class DefinitionNotDefinedException extends Exception{
 
 	private static final long serialVersionUID = 1L;
 	/**

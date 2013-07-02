@@ -1,20 +1,24 @@
 package edu.monash.io.iolibrary;
 
-
+import com.google.gson.JsonObject;
 //IO library
 import edu.monash.io.iolibrary.exceptions.InvalidPathException;
 import edu.monash.io.iolibrary.exceptions.NotSupportException;
 import edu.monash.io.iolibrary.iointerface.exceptions.IOFailException;
+import edu.monash.io.iolibrary.ioobjects.IOObjectsManager;
 
 public class BlockingIO extends IO{
-	
+	public BlockingIO(IOObjectsManager _objects){
+		super(_objects);
+	}
+
 	/*put value to specified path*/
-	public void put(String path, Object value, boolean append) throws InvalidPathException, NotSupportException, IOFailException{
+	public void put(String path, JsonObject value, boolean append) throws InvalidPathException, NotSupportException, IOFailException{
 		this.getIOObjects().put(path, value, append, true);
 	}
 
 	/*overwrite value to specified path*/
-	public void put(String path, Object value) throws InvalidPathException, NotSupportException, IOFailException{
+	public void put(String path, JsonObject value) throws InvalidPathException, NotSupportException, IOFailException{
 		this.put(path, value, false);	
 	}
 
@@ -29,14 +33,22 @@ public class BlockingIO extends IO{
 	}
 
 	/*put a file to specified path*/
-	public void putFile(String path, String filename, boolean append) throws InvalidPathException, NotSupportException, IOFailException{
-		this.getIOObjects().putFile(path, value, append, true);
+	public void putTextFile(String path, String filename, boolean append) throws InvalidPathException, NotSupportException, IOFailException{
+		this.getIOObjects().putTextFile(path, filename, append, true);
+	}
+
+	public void putBinaryFile(String path, String filename, boolean append) throws InvalidPathException, NotSupportException, IOFailException{
+		this.getIOObjects().putBinaryFile(path, filename, append, true);
 	}
 
 	/*put a file to specified path*/
-	public void putFile(String path, String filename) throws InvalidPathException, NotSupportException, IOFailException{
-		this.putFile(path, filename, false);
+	public void putTextFile(String path, String filename) throws InvalidPathException, NotSupportException, IOFailException{
+		this.putTextFile(path, filename, false);
 	}
+
+	public void putBinaryFile(String path, String filename) throws InvalidPathException, NotSupportException, IOFailException{
+		this.putBinaryFile(path, filename, false);
+	}	
 
 	/*retrieve data held at specified path*/
 	public String getString(String path) throws InvalidPathException, NotSupportException, IOFailException{
@@ -59,7 +71,7 @@ public class BlockingIO extends IO{
 	}
 	
 	/*get an object*/
-	public Object getObject(String path) throws InvalidPathException, NotSupportException, IOFailException{
+	public JsonObject getObject(String path) throws InvalidPathException, NotSupportException, IOFailException{
 		return this.getIOObjects().getObject(path);
 	}
 

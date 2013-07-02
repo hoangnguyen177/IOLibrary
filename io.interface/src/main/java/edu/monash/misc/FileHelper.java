@@ -5,11 +5,17 @@ import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
 
 
 public class FileHelper{
@@ -20,12 +26,12 @@ public class FileHelper{
 
 	/** Run the example. */
 	public static void main(String... aArgs) {
-		BytesStreamsAndFiles test = new BytesStreamsAndFiles();
-		//read in the bytes
-		byte[] fileContents = test.read(INPUT_FILE_NAME);
-		//test.readAlternateImpl(INPUT_FILE_NAME);
-		//write it back out to a different file name
-		test.write(fileContents, OUTPUT_FILE_NAME);
+		// FileHelper test = new FileHelper();
+		// //read in the bytes
+		// byte[] fileContents = test.read(INPUT_FILE_NAME);
+		// //test.readAlternateImpl(INPUT_FILE_NAME);
+		// //write it back out to a different file name
+		// test.write(fileContents, OUTPUT_FILE_NAME);
 	}
 
 	/** Read the given binary file, and return its contents as a byte array.*/ 

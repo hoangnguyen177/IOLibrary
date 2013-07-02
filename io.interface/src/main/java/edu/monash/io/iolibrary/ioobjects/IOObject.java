@@ -1,4 +1,4 @@
-package edu.monash.io.iolibrary;
+package edu.monash.io.iolibrary.ioobjects;
 
 
 //Json
@@ -58,9 +58,9 @@ public class IOObject{
 	/*get the json object represent this object*/
 	public JsonObject getObject(){
 		JsonObject _anObject = new JsonObject();
-		_anObject.addProperty(ABOUT, about);
-		_anObject.addProperty(NAME, name);
-		_anObject.addProperty(TYPE, type);
+		_anObject.add(ABOUT, this.about);
+		_anObject.addProperty(NAME, this.getName());
+		_anObject.addProperty(TYPE, this.getType());
 		//do not need to add id
 		return _anObject;
 	}

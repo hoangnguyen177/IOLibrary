@@ -1,5 +1,4 @@
-package edu.monash.io.socketio.client.test;
-
+package edu.monash.io.messagebased.socketio.source;
 import java.util.Arrays;
 
 /** A very fast and memory efficient class to encode and decode to and from BASE64 in full accordance

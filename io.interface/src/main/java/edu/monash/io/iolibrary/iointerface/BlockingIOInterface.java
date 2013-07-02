@@ -7,7 +7,7 @@ package edu.monash.io.iolibrary.iointerface;
 * All these calls are blocking
 */
 
-
+import com.google.gson.JsonObject;
 //IO library
 import edu.monash.io.iolibrary.exceptions.InvalidPathException;
 import edu.monash.io.iolibrary.iointerface.exceptions.IOFailException;
@@ -28,5 +28,5 @@ public interface BlockingIOInterface extends IOInterface{
 	public boolean getBoolean(String path) throws IOFailException;
 	
 	/*get an object*/
-	public Object getObject(String path) throws IOFailException;
+	public JsonObject getObject(String path) throws IOFailException;
 }

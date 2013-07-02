@@ -26,7 +26,7 @@ public class ConfigurationConsts{
 	// replaced bt IoType
 	public static enum IoType {
         INPUT, OUTPUT, INOUT;
-        public static IoType fromString(String s) {
+        public static IoType fromString(String s) throws InvalidIOTypeException{
             if (s != null) {
                 IoType[] vs = values();
                 for (int i = 0; i < vs.length; i++) {

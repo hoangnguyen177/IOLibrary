@@ -1,12 +1,23 @@
 package edu.monash.io.iolibrary.ioobjects;
 
-
+//java 
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Set;
+import java.util.Iterator;
+//gson
+import com.google.gson.JsonObject;
+import com.google.gson.JsonElement;
 //IO Library
-import edu.monash.io.iolibrary.exceptions.NotSupportedException;
+import edu.monash.io.iolibrary.exceptions.NotSupportException;
 import edu.monash.io.iolibrary.exceptions.InvalidDefinitionException;
 import edu.monash.io.iolibrary.exceptions.InvalidDataTypeException;
 import edu.monash.io.iolibrary.exceptions.InvalidIOTypeException;
 import edu.monash.io.iolibrary.iointerface.IOFactory;
+import edu.monash.io.iolibrary.iointerface.exceptions.IOFailException;
+import edu.monash.io.iolibrary.iointerface.BlockingIOInterface;
+import edu.monash.io.iolibrary.iointerface.NonBlockingIOInterface;
+import edu.monash.io.iolibrary.ConfigurationConsts.IoType;
 import static edu.monash.io.iolibrary.ConfigurationConsts.TYPE;
 import static edu.monash.io.iolibrary.ConfigurationConsts.ABOUT;
 import static edu.monash.io.iolibrary.ConfigurationConsts.NAME;
@@ -21,7 +32,7 @@ import static edu.monash.io.iolibrary.ConfigurationConsts.CONNECTION_TIMEOUT;
 import static edu.monash.io.iolibrary.ConfigurationConsts.CONNECTION_NSP;
 import static edu.monash.io.iolibrary.ConfigurationConsts.CONTAINERID;
 import static edu.monash.io.iolibrary.ConfigurationConsts.LAYOUT_VERTICAL;
-
+import static edu.monash.io.iolibrary.ConfigurationConsts.LAYOUT;
 
 
 
@@ -29,17 +40,14 @@ public class IOChannel extends IOObject{
 	/*cosntructor*/
 	public IOChannel(){
 		super();
-		variables = new HashMap<String, IOChannel>();
+		variables = new HashMap<String, IOVariable>();
 		this.setType(TYPE_CHANNEL);
 		layout = LAYOUT_VERTICAL;
-		blockingIO = null;
-		nonBlockingIO = null;
-		configuration = null;
 	}
 
 
 	/*variables*/
-	public void getVariable(String _varName){	
+	public IOVariable getVariable(String _varName){	
 		return variables.get(_varName);	
 	}
 	
@@ -74,20 +82,20 @@ public class IOChannel extends IOObject{
 	// }
 
 	/*blocking io*/
-	public BlockingIOInterface getBlockingIO(boolean shared) throws NotSupportedException{
+	public BlockingIOInterface getBlockingIO(boolean shared) throws NotSupportException{
 		String _path = this.getContainerId();
 		if(!shared)
 			_path += "." + this.getId(); 
-		return IOFactory.getBlockingIO(_path);
+		return IOFactory.getInstance().getBlockingIOInterface(_path);
 	}
 
 	
 	/*non blocking io*/
-	public NonBlockingIOInterface getNonBlockingIO(boolean shared) throws NotSupportedException{
+	public NonBlockingIOInterface getNonBlockingIO(boolean shared) throws NotSupportException{
 		String _path = this.getContainerId();
 		if(!shared)
 			_path += "." + this.getId(); 
-		return IOFactory.getNonBlockingIO(_path);
+		return IOFactory.getInstance().getNonBlockingIOInterface(_path);
 	}
 
 	
@@ -97,13 +105,13 @@ public class IOChannel extends IOObject{
 		JsonObject _obj = super.getObject();
 		_obj.addProperty(LAYOUT, layout);
 		_obj.addProperty(CONTAINERID, containerId);
-		_obj.addProperty(CONFIG, configuration);
+		_obj.add(CONFIG, configuration);
 		//add variables into the object as well
 		Set<String> _keySet = variables.keySet();
 		Iterator<String> _it = _keySet.iterator();
 		while(_it.hasNext()){
 			String _key = _it.next();
-			_obj.addProperty(_key, variables.get(_key).getObject());
+			_obj.add(_key, variables.get(_key).getObject());
 		}
 		return _obj;
 	}
@@ -115,19 +123,19 @@ public class IOChannel extends IOObject{
 	* containerDefinition is provided to create a proper definition, including: container + channel
 	* if the channel is shared in a container, the path will be container id
 	*/
-	public void registerIO(JsonObject containerDefinition, boolean shared) throws InvalidDefinitionException{
+	public void registerIO(JsonObject containerDefinition, boolean shared) throws InvalidDefinitionException, IOFailException{
 		//create connection
 		if(configuration == null)
 			throw new InvalidDefinitionException("Configuration cannot be null");
 		//create definition based on containerDefinition
 		JsonObject _definition = new JsonObject();
-		_definition.addProperty(this.getContainerId(), containerDefinition);
-		_definition.addProperty(this.getId(), this.getObject());
+		_definition.add(this.getContainerId(), containerDefinition);
+		_definition.add(this.getId(), this.getObject());
 		//create the connection
 		String _path = this.getContainerId();
 		if(!shared)
 			_path += "." + this.getId(); 
-		IOFactory.registerIO(_path, _definition);
+		IOFactory.getInstance().registerIO(_path, _definition);
 	}
 
 	/**
@@ -165,22 +173,22 @@ public class IOChannel extends IOObject{
 			Map.Entry<String, JsonElement> entry = _iterator.next();
 			String _key = entry.getKey();
 			JsonElement _value = entry.getValue();
-			if(TYPE.equals(key)){
+			if(TYPE.equals(_key)){
 				//ignore, already set in the constructor
 			}
-			else if(ABOUT.equals(key))	
+			else if(ABOUT.equals(_key))	
 				_channel.setInfo(_value.getAsJsonObject());
-			else if(NAME.equals(key))
+			else if(NAME.equals(_key))
 				_channel.setName(_value.getAsString());
-			else if(CONTAINERID.equals(key))
+			else if(CONTAINERID.equals(_key))
 				_channel.setContainerId(_value.getAsString());
-			else if(CONFIG.equals(key))
+			else if(CONFIG.equals(_key))
 				_channel.setConfiguration(_value.getAsJsonObject());
 			else{	//for variable
 				JsonElement _type = _value.getAsJsonObject().get(TYPE);
 				if(_type!=null){
 					try{
- 						IOType.fromString(_type);
+ 						IoType.fromString(_type.getAsString());
  						//no exception, add it to the list of variables
  						_channel.addVariable(_key, IOVariable.parseIOVariable(_value.getAsJsonObject()));	
 					}
@@ -199,7 +207,7 @@ public class IOChannel extends IOObject{
 	//each channel belongs to a container
 	private String containerId;
 	//each IO channel has a configuration
-	private JsonObject configruation;
+	private JsonObject configuration = null;
 	private BlockingIOInterface blockingIO = null;
 	private NonBlockingIOInterface nonBlockingIO = null;
 	// private boolean blockingSupported = false;

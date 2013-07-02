@@ -6,7 +6,7 @@ package edu.monash.io.iolibrary.exceptions;
  * Throw this exception when the datatype is found invalid
  */
 
-public class InvalidDataTypeException extends Exceptions{
+public class InvalidDataTypeException extends Exception{
 
 	private static final long serialVersionUID = 1L;
 	/**

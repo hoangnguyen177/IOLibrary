@@ -10,22 +10,25 @@ import com.google.gson.*;
 
 // IO library
 import edu.monash.io.iolibrary.iointerface.NonBlockingIOInterface;
-import edu.monash.io.iolibrary.ConfigurationConst;
-import edu.monash.io.iolibrary.ConfigurationConst.DataType;
+import edu.monash.io.iolibrary.ConfigurationConsts;
+import edu.monash.io.iolibrary.ConfigurationConsts.DataType;
 import edu.monash.io.iolibrary.ConfigurationHelper;
 import edu.monash.misc.FileHelper;
 import edu.monash.io.iolibrary.messagebased.MessageConsts;
 import edu.monash.io.iolibrary.exceptions.InvalidDataTypeException;
 import edu.monash.io.iolibrary.exceptions.InvalidDefinitionException;
 import edu.monash.io.iolibrary.iointerface.exceptions.IOFailException;
+import edu.monash.io.iolibrary.DataHandler;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 //connection
 import edu.monash.io.socketio.connection.*;
 import edu.monash.io.socketio.exceptions.*;
 
-import static edu.monash.io.socketio.ConnectionConsts.CLIENT_C_MESSAGE ;
-import static edu.monash.io.socketio.ConnectionConsts.MESSAGE_C_MESSAGE_CODE ;
+import static edu.monash.io.socketio.connection.ConnectionConsts.CLIENT_C_MESSAGE ;
+import static edu.monash.io.socketio.connection.ConnectionConsts.MESSAGE_C_MESSAGE_CODE ;
 
 
 
@@ -35,17 +38,17 @@ public class NonBlockingIO implements NonBlockingIOInterface{
 		definition = _definition;
 		source = new SourceConnection(); 
 	    JsonObject connectionConfig = ConfigurationHelper.getConfigFromDefinition(definition);
-		if(connectionConfig.has(ConfigurationConst.CONNECTION_HOST))
-			source.setHost(connectionConfig.get(ConfigurationConst.CONNECTION_HOST));
-		if(connectionConfig.has(ConfigurationConst.CONNECTION_PROTOCOL))
-			source.setHost(connectionConfig.get(ConfigurationConst.CONNECTION_PROTOCOL));
-		if(connectionConfig.has(ConfigurationConst.CONNECTION_NSP))
-			source.setHost(connectionConfig.get(ConfigurationConst.CONNECTION_NSP));				
-		if(connectionConfig.has(ConfigurationConst.CONNECTION_PORT))
-			source.setHost(connectionConfig.get(Integer.parseInt(ConfigurationConst.CONNECTION_HOST)));
-		if(connectionConfig.has(ConfigurationConst.CONNECTION_TIMEOUT))
-			source.setHost(connectionConfig.get(Integer.parseInt(ConfigurationConst.CONNECTION_TIMEOUT)));
-		source.setAuthInfo(config.getSourceInfo(_componentId));
+		if(connectionConfig.has(ConfigurationConsts.CONNECTION_HOST))
+			source.setHost(connectionConfig.get(ConfigurationConsts.CONNECTION_HOST).getAsString());
+		if(connectionConfig.has(ConfigurationConsts.CONNECTION_PROTOCOL))
+			source.setProtocol(connectionConfig.get(ConfigurationConsts.CONNECTION_PROTOCOL).getAsString());
+		if(connectionConfig.has(ConfigurationConsts.CONNECTION_NSP))
+			source.setNsp(connectionConfig.get(ConfigurationConsts.CONNECTION_NSP).getAsString());				
+		if(connectionConfig.has(ConfigurationConsts.CONNECTION_PORT))
+			source.setPort(connectionConfig.get(ConfigurationConsts.CONNECTION_HOST).getAsInt());
+		if(connectionConfig.has(ConfigurationConsts.CONNECTION_TIMEOUT))
+			source.setTimeout(connectionConfig.get(ConfigurationConsts.CONNECTION_TIMEOUT).getAsInt());
+		source.setAuthInfo(definition);
 		source.addListener(new SourceListener(){
 			public void onConnectionEstablished(){
 				System.out.println("TestSourceClient:: socket established");
@@ -56,9 +59,14 @@ public class NonBlockingIO implements NonBlockingIOInterface{
 			public void onAuthResponse(JsonObject authResponse){
 				System.out.println("TestSourceClient:: auth response:" + authResponse.toString());
 			}
-			public void onMessage(JsonObject aMessage) throws InvalidMessageException{
+			public void onMessage(JsonObject aMessage){
 				System.out.println("TestSourceClient:: new message: " + aMessage.toString());
-				processMessage(aMessage);
+				try{
+					processMessage(aMessage);
+				}
+				catch(InvalidDataTypeException e){
+					//ignored the message
+				}
 			}	
 			public void onSinkDisconnect(){
 				System.out.println("TestSourceClient:: sink disconnect, no more sink");	
@@ -99,30 +107,32 @@ public class NonBlockingIO implements NonBlockingIOInterface{
 	/*add handler so that it can be called back, note if wrong handler, string is return*/
 	//basically you can add handler anywhere, but it does not mean you can have data returned
 	public void addDataHandler(String path, DataHandler handler){
-		if(!handlers.contains(path))
-			handler.put(path, handler);
+		if(!handlers.containsKey(path))
+			handlers.put(path, handler);
 	}
 
 
 	/*put value to specified path*/
-	public void put(String path, Object value, boolean append) throws IOFailException{
+	public void put(String path, JsonObject value, boolean append) throws IOFailException{
+		if(!(value instanceof JsonObject))
+			throw new IOFailException("Can only send instance of JsonObject");
 		//now create the message
 		JsonObject jObject = new JsonObject();
 		//tells server that this is a message
 		jObject.addProperty(MESSAGE_C_MESSAGE_CODE, CLIENT_C_MESSAGE);
 		jObject.addProperty(MessageConsts.PATH , path);
-		jObject.addProperty(MessageConsts.DATA , value);
-		jObject.addProperty(MessageConsts.DATA_TYPE , DataType.OBJECT);
+		jObject.add(MessageConsts.DATA , value);
+		jObject.addProperty(MessageConsts.DATA_TYPE , DataType.OBJECT.toString());
 		jObject.addProperty(MessageConsts.APPEND , append);
 		//add path, value and append
 		try{
-			source.send(message);
+			source.send(jObject);
 		}
 		catch(ConnectionFailException e){
-			throw new IOFailException(e.getMessage);
+			throw new IOFailException(e.getMessage());
 		}
 		catch(UnauthcatedClientException e){
-			throw new IOFailException(e.getMessage);
+			throw new IOFailException(e.getMessage());
 		}
 		
 	}
@@ -136,18 +146,18 @@ public class NonBlockingIO implements NonBlockingIOInterface{
 		jObject.addProperty(MESSAGE_C_MESSAGE_CODE, CLIENT_C_MESSAGE);
 		jObject.addProperty(MessageConsts.PATH , path);
 		jObject.addProperty(MessageConsts.DATA , Base64.encodeToString(value, false));
-		jObject.addProperty(MessageConsts.DATA_TYPE , DataType.BYTEARRAY);
+		jObject.addProperty(MessageConsts.DATA_TYPE , DataType.BYTEARRAY.toString());
 		jObject.addProperty(MessageConsts.APPEND , append);
 
 		//add path, value and append
 		try{
-			source.send(message);
+			source.send(jObject);
 		}
 		catch(ConnectionFailException e){
-			throw new IOFailException(e.getMessage);
+			throw new IOFailException(e.getMessage());
 		}
 		catch(UnauthcatedClientException e){
-			throw new IOFailException(e.getMessage);
+			throw new IOFailException(e.getMessage());
 		}		
 	}
 
@@ -157,16 +167,16 @@ public class NonBlockingIO implements NonBlockingIOInterface{
 	public void putTextFile(String path, String filename, boolean append) throws IOFailException{
 		//read the file in first
 		try{
-			byte[] contents = FileHelper.readTextFile(filename);
+			String contents = FileHelper.readTextFile(filename);
 			JsonObject jObject = new JsonObject();
 			jObject.addProperty(MESSAGE_C_MESSAGE_CODE, CLIENT_C_MESSAGE);
 			jObject.addProperty(MessageConsts.PATH , path);
-			jObject.addProperty(MessageConsts.DATA , Base64.encodeToString(contents, false));
+			jObject.addProperty(MessageConsts.DATA , contents);
 			jObject.addProperty(MessageConsts.DATA_TYPE , DataType.TEXT.toString());
 			jObject.addProperty(MessageConsts.FILE_NAME, filename);
 			jObject.addProperty(MessageConsts.APPEND , append);
 			//add path, value and append
-			source.send(message);
+			source.send(jObject);
 		}
 		catch(FileNotFoundException e){
 			throw new IOFailException(e.getMessage());
@@ -175,10 +185,10 @@ public class NonBlockingIO implements NonBlockingIOInterface{
 			throw new IOFailException(e.getMessage());
 		}
 		catch(ConnectionFailException e){
-			throw new IOFailException(e.getMessage);
+			throw new IOFailException(e.getMessage());
 		}
 		catch(UnauthcatedClientException e){
-			throw new IOFailException(e.getMessage);
+			throw new IOFailException(e.getMessage());
 		}
 
 	}
@@ -195,7 +205,7 @@ public class NonBlockingIO implements NonBlockingIOInterface{
 			jObject.addProperty(MessageConsts.FILE_NAME, filename);
 			jObject.addProperty(MessageConsts.APPEND , append);
 			//add path, value and append
-			source.send(message);
+			source.send(jObject);
 		}
 		catch(FileNotFoundException e){
 			throw new IOFailException(e.getMessage());
@@ -204,10 +214,10 @@ public class NonBlockingIO implements NonBlockingIOInterface{
 			throw new IOFailException(e.getMessage());
 		}
 		catch(ConnectionFailException e){
-			throw new IOFailException(e.getMessage);
+			throw new IOFailException(e.getMessage());
 		}
 		catch(UnauthcatedClientException e){
-			throw new IOFailException(e.getMessage);
+			throw new IOFailException(e.getMessage());
 		}
 
 	}
@@ -220,7 +230,7 @@ public class NonBlockingIO implements NonBlockingIOInterface{
 		DataHandler _handler = handlers.get(_path);
 		if(_handler!=null){
 			DataType _type = DataType.fromString(aMessage.get(MessageConsts.DATA_TYPE).getAsString());
-			String _data = aMessage.get(MessageConsts.DATA);
+			String _data = aMessage.get(MessageConsts.DATA).getAsString();
 			try{
 				if(_type == DataType.INT){
 					int val = Integer.parseInt(_data);
@@ -228,11 +238,11 @@ public class NonBlockingIO implements NonBlockingIOInterface{
 				}
 				else if(_type == DataType.DOUBLE){
 					double val = Double.parseDouble(_data);
-					_handler.onInt(val);
+					_handler.onDouble(val);
 				}
 				else if(_type == DataType.BOOL){
 					boolean val = Boolean.parseBoolean(_data);
-					_handler.onInt(val);
+					_handler.onBoolean(val);
 				}
 				else if(_type == DataType.OBJECT){
 					JsonParser parser = new JsonParser();
@@ -252,7 +262,8 @@ public class NonBlockingIO implements NonBlockingIOInterface{
 					_handler.onString(_data);
 				}
 			}
-
+			catch(NumberFormatException e){}
+			catch(JsonSyntaxException e){}
 		}
 
 	}

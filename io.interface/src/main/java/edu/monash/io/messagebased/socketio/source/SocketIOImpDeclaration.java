@@ -4,7 +4,7 @@ package edu.monash.io.messagebased.socketio.source;
 //IO library
 import edu.monash.io.iolibrary.iointerface.ImpDeclaration;
 
-public class SocketIOImplementation implements ImpDeclaration{
+public class SocketIOImpDeclaration implements ImpDeclaration{
 
 	/*version of the implementation*/
 	public String version(){
