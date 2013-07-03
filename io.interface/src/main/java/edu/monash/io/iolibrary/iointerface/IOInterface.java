@@ -26,6 +26,18 @@ public interface IOInterface{
 	//and definition contains the declartion for the whole channel + container
 	public void initialise(JsonObject definition) throws InvalidDefinitionException, IOFailException;
 
+	//put string
+	public void putString(String path, String value, boolean append) throws IOFailException;
+
+	//put int
+	public void putInt(String path, int value, boolean append) throws IOFailException;
+
+	//double
+	public void putDouble(String path, double value, boolean append) throws IOFailException;
+
+	//boolean
+	public void putBoolean(String path, boolean value, boolean append) throws IOFailException;
+
 	/*put value to specified path*/
 	public void put(String path, JsonObject value, boolean append) throws IOFailException;
 

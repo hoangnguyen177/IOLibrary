@@ -50,6 +50,21 @@ public class JsonHelper{
 		_currentObject.add(_lastKey, value);
 	}
 
+	/**
+	* clone JsonObject
+	*/
+	public static JsonObject cloneJsonObject(JsonObject object){
+		JsonObject returnElement = null;
+		JsonParser parser = new JsonParser();
+		try{
+			returnElement = parser.parse(object.toString()).getAsJsonObject();
+		}
+		catch(JsonSyntaxException e){
+			//ignored, return null
+		}
+		return returnElement;
+	}
+
 	
 
 }

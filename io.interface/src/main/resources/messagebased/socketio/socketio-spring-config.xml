@@ -10,7 +10,7 @@
         class="edu.monash.io.messagebased.socketio.source.NonBlockingIO"
         scope="prototype" />
   <bean id="impdeclaration"
-        class="edu.monash.io.messagebased.socketio.source.SocketIOImpDeclaration"
+        class="edu.monash.io.messagebased.socketio.source.SocketIOImp"
         scope="prototype" />
 
 </beans>

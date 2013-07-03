@@ -90,9 +90,9 @@ public class IOObjectsManager{
 		int firstDotPosition = path.indexOf('.');
 		if(firstDotPosition <0)
 			throw new InvalidPathException(path + " is not an valid path");
-		String _containerId = path.substring(0, firstDotPosition-1);
+		String _containerId = path.substring(0, firstDotPosition);
 		if(containers.containsKey(_containerId))
-			return containers.get(_containerId).getBlockingIOInterface(path.substring(firstDotPosition+1, path.length()-1));
+			return containers.get(_containerId).getBlockingIOInterface(path.substring(firstDotPosition+1, path.length()));
 		else
 			throw new InvalidPathException("There is no container:" + _containerId);
 	}	
@@ -104,9 +104,9 @@ public class IOObjectsManager{
 		int firstDotPosition = path.indexOf('.');
 		if(firstDotPosition <0)
 			throw new InvalidPathException(path + " is not an valid path");
-		String _containerId = path.substring(0, firstDotPosition-1);
+		String _containerId = path.substring(0, firstDotPosition);
 		if(containers.containsKey(_containerId))
-			return containers.get(_containerId).getNonBlockingIOInterface(path.substring(firstDotPosition+1, path.length()-1));
+			return containers.get(_containerId).getNonBlockingIOInterface(path.substring(firstDotPosition+1, path.length()));
 		else
 			throw new InvalidPathException("There is no container:" + _containerId);
 	}
@@ -116,47 +116,62 @@ public class IOObjectsManager{
 
 
 	/////////////////////////////////////////////////////////////
-	//io variables
+	private IOInterface getIOInterface(String path, boolean blocking)throws InvalidPathException, NotSupportException 
+	{
+		if(blocking)
+			return this.getBlockingIOInterface(path);
+		else
+			return this.getNonBlockingIOInterface(path);
+	}
 	/*put value to specified path*/
 	public void put(String path, JsonObject value, boolean append, boolean blocking) throws InvalidPathException, 
 																NotSupportException, IOFailException
 	{
-		IOInterface _ioInterface = null;
-		if(blocking)
-			_ioInterface= this.getBlockingIOInterface(path);
-		else
-			_ioInterface= this.getNonBlockingIOInterface(path);
-		if(_ioInterface==null)
-			throw new IOFailException("cannot get the IO interface. Something goes wrong");
-		_ioInterface.put(path, value, append);
+		this.getIOInterface(path, blocking).put(path, value, append);
 	}
+
+	//put string
+	public void putString(String path, String value, boolean append, boolean blocking) throws InvalidPathException, 
+																NotSupportException, IOFailException
+	{
+		this.getIOInterface(path, blocking).putString(path, value, append);
+	}
+
+	//put int
+	public void putInt(String path, int value, boolean append, boolean blocking) throws InvalidPathException, 
+																NotSupportException, IOFailException
+	{
+		this.getIOInterface(path, blocking).putInt(path, value, append);
+	}
+
+	//double
+	public void putDouble(String path, double value, boolean append, boolean blocking) throws InvalidPathException, 
+																NotSupportException, IOFailException
+	{
+		this.getIOInterface(path, blocking).putDouble(path, value, append);
+	}
+
+	//boolean
+	public void putBoolean(String path, boolean value, boolean append, boolean blocking) throws InvalidPathException, 
+																NotSupportException, IOFailException
+	{
+		this.getIOInterface(path, blocking).putBoolean(path, value, append);
+	}
+
+
 
 	/*put an array of byte to specified path*/
 	public void putData(String path, byte[] value, boolean append, boolean blocking) throws InvalidPathException, 
 																	NotSupportException, IOFailException
 	{
-		IOInterface _ioInterface = null;
-		if(blocking)
-			_ioInterface= this.getBlockingIOInterface(path);
-		else
-			_ioInterface= this.getNonBlockingIOInterface(path);
-		if(_ioInterface==null)
-			throw new IOFailException("cannot get the IO interface. Something goes wrong");
-		_ioInterface.putData(path, value, append);
+		this.getIOInterface(path, blocking).putData(path, value, append);
 	}																
 
 	/*put a file to specified path*/
 	public void putTextFile(String path, String filename, boolean append, boolean blocking) throws InvalidPathException, 
 																		NotSupportException, IOFailException
 	{
-		IOInterface _ioInterface = null;
-		if(blocking)
-			_ioInterface= this.getBlockingIOInterface(path);
-		else
-			_ioInterface= this.getNonBlockingIOInterface(path);
-		if(_ioInterface==null)
-			throw new IOFailException("cannot get the IO interface. Something goes wrong");
-		_ioInterface.putTextFile(path, filename, append);
+		this.getIOInterface(path, blocking).putTextFile(path, filename, append);
 	}
 
 
@@ -164,14 +179,7 @@ public class IOObjectsManager{
 	public void putBinaryFile(String path, String filename, boolean append, boolean blocking) throws InvalidPathException, 
 																		NotSupportException, IOFailException
 	{
-		IOInterface _ioInterface = null;
-		if(blocking)
-			_ioInterface= this.getBlockingIOInterface(path);
-		else
-			_ioInterface= this.getNonBlockingIOInterface(path);
-		if(_ioInterface==null)
-			throw new IOFailException("cannot get the IO interface. Something goes wrong");
-		_ioInterface.putBinaryFile(path, filename, append);
+		this.getIOInterface(path, blocking).putBinaryFile(path, filename, append);
 	}
 
 

@@ -92,7 +92,7 @@ public class IOContainer extends IOObject{
 		int firstDotPosition = path.indexOf('.');
 		if(firstDotPosition <0)
 			throw new InvalidPathException(path + " is not a valid path");
-		String _channelid = path.substring(0, firstDotPosition-1);
+		String _channelid = path.substring(0, firstDotPosition);
 		if(channels.containsKey(_channelid))
 			return channels.get(_channelid).getBlockingIO(this.sharedIo());
 		else
@@ -106,7 +106,7 @@ public class IOContainer extends IOObject{
 		int firstDotPosition = path.indexOf('.');
 		if(firstDotPosition <0)
 			throw new InvalidPathException(path + " is not a valid path");
-		String _channelid = path.substring(0, firstDotPosition-1);
+		String _channelid = path.substring(0, firstDotPosition);
 		if(channels.containsKey(_channelid))
 			return channels.get(_channelid).getNonBlockingIO(this.sharedIo());
 		else

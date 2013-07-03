@@ -180,6 +180,8 @@ public class IOChannel extends IOObject{
 				_channel.setInfo(_value.getAsJsonObject());
 			else if(NAME.equals(_key))
 				_channel.setName(_value.getAsString());
+			else if(LAYOUT.equals(_key))
+				_channel.setLayout(_value.getAsString());
 			else if(CONTAINERID.equals(_key))
 				_channel.setContainerId(_value.getAsString());
 			else if(CONFIG.equals(_key))

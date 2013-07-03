@@ -36,31 +36,19 @@ public class NonBlockingIO implements NonBlockingIOInterface{
 	/*initialise the interface*/
 	public void initialise(JsonObject _definition) throws IOFailException, InvalidDefinitionException{
 		definition = _definition;
-		source = new SourceConnection(); 
-	    JsonObject connectionConfig = ConfigurationHelper.getConfigFromDefinition(definition);
-		if(connectionConfig.has(ConfigurationConsts.CONNECTION_HOST))
-			source.setHost(connectionConfig.get(ConfigurationConsts.CONNECTION_HOST).getAsString());
-		if(connectionConfig.has(ConfigurationConsts.CONNECTION_PROTOCOL))
-			source.setProtocol(connectionConfig.get(ConfigurationConsts.CONNECTION_PROTOCOL).getAsString());
-		if(connectionConfig.has(ConfigurationConsts.CONNECTION_NSP))
-			source.setNsp(connectionConfig.get(ConfigurationConsts.CONNECTION_NSP).getAsString());				
-		if(connectionConfig.has(ConfigurationConsts.CONNECTION_PORT))
-			source.setPort(connectionConfig.get(ConfigurationConsts.CONNECTION_HOST).getAsInt());
-		if(connectionConfig.has(ConfigurationConsts.CONNECTION_TIMEOUT))
-			source.setTimeout(connectionConfig.get(ConfigurationConsts.CONNECTION_TIMEOUT).getAsInt());
-		source.setAuthInfo(definition);
+		source = ConnectionFactory.getInstance().getConnection(definition);
 		source.addListener(new SourceListener(){
 			public void onConnectionEstablished(){
-				System.out.println("TestSourceClient:: socket established");
+				System.out.println("NonBlockingIO:: socket established");
 			}
 			public void onDisconnect(){
-				System.out.println("TestSourceClient:: disconnect");
+				System.out.println("NonBlockingIO:: disconnect");
 			}
 			public void onAuthResponse(JsonObject authResponse){
-				System.out.println("TestSourceClient:: auth response:" + authResponse.toString());
+				System.out.println("NonBlockingIO:: auth response:" + authResponse.toString());
 			}
 			public void onMessage(JsonObject aMessage){
-				System.out.println("TestSourceClient:: new message: " + aMessage.toString());
+				System.out.println("NonBlockingIO:: new message: " + aMessage.toString());
 				try{
 					processMessage(aMessage);
 				}
@@ -69,31 +57,12 @@ public class NonBlockingIO implements NonBlockingIOInterface{
 				}
 			}	
 			public void onSinkDisconnect(){
-				System.out.println("TestSourceClient:: sink disconnect, no more sink");	
+				System.out.println("NonBlockingIO:: sink disconnect, no more sink");	
 			}
 			public void onSinkConnect(JsonArray sinkList){
-				System.out.println("TestSourceClient:: new sink connect, sinklist:" + sinkList.toString());	
+				System.out.println("NonBlockingIO:: new sink connect, sinklist:" + sinkList.toString());	
 			}
 		});
-		try{
-			//create the socket
-            //connect
-			source.connect();
-			//wait till this source is authenticated
-			while(!source.authcated()){
-				try{
-					Thread.sleep(600);
-				}
-				catch(Exception e){}
-			}//end small while	
-
-        }
-		catch(ConnectionFailException e){
-			throw new IOFailException(e.getMessage());
-		}
-        catch(JsonSyntaxException e){
-            throw new InvalidDefinitionException(e.getMessage());
-        }
 	}
 
 	/*get the definition of the operation*/
@@ -114,9 +83,6 @@ public class NonBlockingIO implements NonBlockingIOInterface{
 
 	/*put value to specified path*/
 	public void put(String path, JsonObject value, boolean append) throws IOFailException{
-		if(!(value instanceof JsonObject))
-			throw new IOFailException("Can only send instance of JsonObject");
-		//now create the message
 		JsonObject jObject = new JsonObject();
 		//tells server that this is a message
 		jObject.addProperty(MESSAGE_C_MESSAGE_CODE, CLIENT_C_MESSAGE);
@@ -137,7 +103,89 @@ public class NonBlockingIO implements NonBlockingIOInterface{
 		
 	}
 
-	
+	//put string
+	public void putString(String path, String value, boolean append) throws IOFailException{
+		JsonObject jObject = new JsonObject();
+		//tells server that this is a message
+		jObject.addProperty(MESSAGE_C_MESSAGE_CODE, CLIENT_C_MESSAGE);
+		jObject.addProperty(MessageConsts.PATH , path);
+		jObject.addProperty(MessageConsts.DATA , value);
+		jObject.addProperty(MessageConsts.DATA_TYPE , DataType.STRING.toString());
+		jObject.addProperty(MessageConsts.APPEND , append);
+		//add path, value and append
+		try{
+			source.send(jObject);
+		}
+		catch(ConnectionFailException e){
+			throw new IOFailException(e.getMessage());
+		}
+		catch(UnauthcatedClientException e){
+			throw new IOFailException(e.getMessage());
+		}
+	}
+
+	//put int
+	public void putInt(String path, int value, boolean append) throws IOFailException{
+		JsonObject jObject = new JsonObject();
+		//tells server that this is a message
+		jObject.addProperty(MESSAGE_C_MESSAGE_CODE, CLIENT_C_MESSAGE);
+		jObject.addProperty(MessageConsts.PATH , path);
+		jObject.addProperty(MessageConsts.DATA , value);
+		jObject.addProperty(MessageConsts.DATA_TYPE , DataType.INT.toString());
+		jObject.addProperty(MessageConsts.APPEND , append);
+		//add path, value and append
+		try{
+			source.send(jObject);
+		}
+		catch(ConnectionFailException e){
+			throw new IOFailException(e.getMessage());
+		}
+		catch(UnauthcatedClientException e){
+			throw new IOFailException(e.getMessage());
+		}
+	}
+
+	//double
+	public void putDouble(String path, double value, boolean append) throws IOFailException{
+		JsonObject jObject = new JsonObject();
+		//tells server that this is a message
+		jObject.addProperty(MESSAGE_C_MESSAGE_CODE, CLIENT_C_MESSAGE);
+		jObject.addProperty(MessageConsts.PATH , path);
+		jObject.addProperty(MessageConsts.DATA , value);
+		jObject.addProperty(MessageConsts.DATA_TYPE , DataType.DOUBLE.toString());
+		jObject.addProperty(MessageConsts.APPEND , append);
+		//add path, value and append
+		try{
+			source.send(jObject);
+		}
+		catch(ConnectionFailException e){
+			throw new IOFailException(e.getMessage());
+		}
+		catch(UnauthcatedClientException e){
+			throw new IOFailException(e.getMessage());
+		}
+	}
+
+	//boolean
+	public void putBoolean(String path, boolean value, boolean append) throws IOFailException{
+		JsonObject jObject = new JsonObject();
+		//tells server that this is a message
+		jObject.addProperty(MESSAGE_C_MESSAGE_CODE, CLIENT_C_MESSAGE);
+		jObject.addProperty(MessageConsts.PATH , path);
+		jObject.addProperty(MessageConsts.DATA , value);
+		jObject.addProperty(MessageConsts.DATA_TYPE , DataType.BOOL.toString());
+		jObject.addProperty(MessageConsts.APPEND , append);
+		//add path, value and append
+		try{
+			source.send(jObject);
+		}
+		catch(ConnectionFailException e){
+			throw new IOFailException(e.getMessage());
+		}
+		catch(UnauthcatedClientException e){
+			throw new IOFailException(e.getMessage());
+		}
+	}
 
 	/*put an array of byte to specified path*/
 	public void putData(String path, byte[] value, boolean append) throws IOFailException{

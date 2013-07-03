@@ -45,8 +45,8 @@ public class IOVariable extends IOObject{
 	public String getGuiElement()						{ return guiElement;	 }
 
 	/*data*/
-	public void setData(JsonObject _data)				{ data = _data;			}
-	public JsonObject getData()							{ return data;			}
+	public void setData(JsonElement _data)				{ data = _data;			}
+	public JsonElement getData()							{ return data;			}
 
 	/**
 	* to JsonObject
@@ -99,7 +99,7 @@ public class IOVariable extends IOObject{
 			else if(OUT_DATA_TYPE.equals(_key))
 				_variable.setOutputDataType(DataType.fromString(_value.getAsString()));
 			else if(DATA.equals(_key))
-				_variable.setData(_value.getAsJsonObject());	
+				_variable.setData(_value);	
 		}
 		return _variable;
 	}
@@ -114,5 +114,5 @@ public class IOVariable extends IOObject{
 	private String guiElement;
 	//data
 	// not sure whether this is the right decision
-	private JsonObject data;
+	private JsonElement data;
 }

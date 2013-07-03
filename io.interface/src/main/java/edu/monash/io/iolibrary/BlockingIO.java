@@ -22,6 +22,65 @@ public class BlockingIO extends IO{
 		this.put(path, value, false);	
 	}
 
+	//put string
+	public void putString(String path, String value, boolean append) throws InvalidPathException, 
+																NotSupportException, IOFailException
+	{
+		this.getIOObjects().putString(path, value, append, true);
+	}
+
+	//put int
+	public void putInt(String path, int value, boolean append) throws InvalidPathException, 
+																NotSupportException, IOFailException
+	{
+		this.getIOObjects().putInt(path, value, append, true);
+	}
+
+	//double
+	public void putDouble(String path, double value, boolean append) throws InvalidPathException, 
+																NotSupportException, IOFailException
+	{
+		this.getIOObjects().putDouble(path, value, append, true);
+	}
+
+	//boolean
+	public void putBoolean(String path, boolean value, boolean append) throws InvalidPathException, 
+																NotSupportException, IOFailException
+	{
+		this.getIOObjects().putBoolean(path, value, append, true);
+	}
+
+	//put string
+	public void putString(String path, String value) throws InvalidPathException, 
+																NotSupportException, IOFailException
+	{
+		this.putString(path, value, false);
+	}
+
+	//put int
+	public void putInt(String path, int value) throws InvalidPathException, 
+																NotSupportException, IOFailException
+	{
+		this.putInt(path, value, false);		
+	}
+
+	//double
+	public void putDouble(String path, double value) throws InvalidPathException, 
+																NotSupportException, IOFailException
+	{
+		this.putDouble(path, value, false);		
+	}
+
+	//boolean
+	public void putBoolean(String path, boolean value) throws InvalidPathException, 
+																NotSupportException, IOFailException
+	{
+		this.putBoolean(path, value, false);		
+	}
+
+
+
+
 	/*put an array of byte to specified path*/
 	public void putData(String path, byte[] value, boolean append) throws InvalidPathException, NotSupportException, IOFailException{
 		this.getIOObjects().putData(path, value, append, true);

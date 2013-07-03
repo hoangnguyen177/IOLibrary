@@ -241,7 +241,7 @@ io.of(nsp).on(CLIENT_CONST.connect, function (socket) {
     // message from source
     if(isSource(socket.id, sources)){
       //distribute it to the sinks
-      if(connections[socket.id].length > 0)
+      if(connections.hasOwnProperty(socket.id) && connections[socket.id].length > 0)
         log("[message] send message to all sinks");
       else
         log("[message] this source is not connected to any sink.");
