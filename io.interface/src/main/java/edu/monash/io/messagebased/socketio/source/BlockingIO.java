@@ -309,6 +309,10 @@ public class BlockingIO implements BlockingIOInterface{
 	}
 	//what to do with the messages
 	private synchronized void processMessage(JsonObject aMessage){
+		//different message from server
+		//ifnore
+		if(!aMessage.has(MessageConsts.PATH))
+			return;
 		String _path = aMessage.get(MessageConsts.PATH).getAsString();
 		if(_path!=null&& !_path.isEmpty()){
 			messages.put(_path, aMessage);

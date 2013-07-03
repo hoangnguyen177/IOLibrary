@@ -1,0 +1,48 @@
+{
+	"TestIOLibrary":{
+		"about":{
+			"title": "test",
+			"description": "this is just a test",
+			"author": "hoang",
+			"date": "2-jul-2013"},
+		"shared": true,
+		"layout": "horizontal",
+		"type": "container"
+	},													
+	"ioChannel1":{																
+		"type": "channel", 
+		"about":{															
+				"label": "first channel",											
+				"description": "first channel",									
+				"hint": ""												
+		},
+		"configuration":{
+			"type": "socketio",
+			"host":"localhost",
+			"port": 8080,
+			"username": "hoangnguyen",
+			"pass": "pass"
+		}, 
+		"containerid": "TestIOLibrary",
+		"layout": "vertical", 
+		"input1":{															
+			"type": "input",													
+			"about":{															
+				"label": "label here",											
+				"description": "description here",									
+				"hint": "hint here"												
+			},
+			"in_datatype": "STRING",
+			"out_datatype": "OBJECT",
+			"guielement": "choice",
+			"data":[{"label": "option1", "description": "this is option 1"}, 
+					{"label": "option2", "description": "this is option 2"}]
+		}, 
+		"output1":{
+			"type": "output",
+			"out_datatype": "STRING",
+			"guielement": "textarea",
+			"data": ""
+		}
+	}
+}

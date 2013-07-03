@@ -274,6 +274,8 @@ public class NonBlockingIO implements NonBlockingIOInterface{
 
 	/***************************************/
 	private void processMessage(JsonObject aMessage) throws InvalidDataTypeException{
+		if(!aMessage.has(MessageConsts.PATH))
+			return;
 		String _path = aMessage.get(MessageConsts.PATH).getAsString();
 		DataHandler _handler = handlers.get(_path);
 		if(_handler!=null){
