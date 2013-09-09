@@ -2,7 +2,7 @@
 /////////////////////////////////////////////////////
 //Constants
 /////////////////////////////////////////////////////
-var CONNECTION_CONST = {
+var CONNECTION_CONF = {
   proc    : 'http'        ,
   host    : 'localhost'   ,
   port    : 8080          ,
@@ -104,8 +104,8 @@ var express = require('express')
   , io = require('socket.io').listen(server);
 
 
-var  port = parseInt(process.argv[2], 10) || CONNECTION_CONST.port
-     , nsp = process.argv[3] || CONNECTION_CONST.nsp;
+var  port = parseInt(process.argv[2], 10) || CONNECTION_CONF.port
+     , nsp = process.argv[3] || CONNECTION_CONF.nsp;
 
 // routing
 app.get(nsp, function (req, res) {
