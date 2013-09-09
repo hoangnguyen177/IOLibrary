@@ -7,7 +7,7 @@ import java.io.*;
 
 public class TestSinkClient{
 	//sink
-	SinkConnection sink;
+	final SinkConnection sink;
 
 	public TestSinkClient(){
 		System.out.println("TEtSinkClient constructor");
@@ -29,12 +29,13 @@ public class TestSinkClient{
 				}
 				public void onAuthResponse(JsonObject authResponse){
 					System.out.println("TestSinkClient:: auth response:" + authResponse.toString());
+					System.out.println("TestSinkClient:: new source connected:" + sink.getSourceList().toString());
 				}
 				public void onMessage(JsonObject aMessage) throws InvalidMessageException{
 					System.out.println("TestSinkClient:: new message:" + aMessage.toString());
 				}	
 				public void onSourceDisconnect(){
-					System.out.println("TestSinkClient:: source disconnected");
+					System.out.println("TestSinkClient:: a source disconnected: is still connected:" + sink.isConnected());
 				}
 				public void onSourceConnect(JsonObject sourceList){
 					System.out.println("TestSinkClient:: new source connected:" + sourceList.toString());
@@ -63,9 +64,19 @@ public class TestSinkClient{
 			    	System.out.print("source: ");
 			    	BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 					source = br.readLine();
-					sink.getSocket().emit(ConnectionConsts.CLIENT_C_SELECT, source);
+					//sink.getSocket().emit(ConnectionConsts.CLIENT_C_SELECT, source);
+					sink.selectSource(source);
 				} catch (IOException ioe) {
 			        System.out.println("IO error trying to read your name!");
+			        System.exit(1);
+			    }
+			    catch(UnauthcatedClientException e){
+    				System.out.println(e.getMessage());
+			        System.exit(1);
+			    
+			    }
+			    catch(InvalidSourceException e){
+    				System.out.println(e.getMessage());
 			        System.exit(1);
 			    }
 			}	

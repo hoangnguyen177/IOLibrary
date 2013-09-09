@@ -18,6 +18,8 @@ public class SinkConnection extends Connection{
 	private boolean doneSelection = false;
 	/*permission*/
 	private String permission = "";
+	/*connected source*/
+	private String connectedSourceId = "";
 
 
 	/*gets and sets*/
@@ -25,17 +27,20 @@ public class SinkConnection extends Connection{
 
 	public String 	getPermission() {return permission;}
 
-	
+	public String 	getConnectedSource() {return connectedSourceId;}
+
 	/**
 	* select a source from the source list
 	*/
 	public void selectSource(String sourceId) throws UnauthcatedClientException, InvalidSourceException{
 		if(!authcated())
 			throw new UnauthcatedClientException("[SinkConnection::selectSource] not authcated yet");
-		if(checkSourceInSourceList(sourceId))
-			throw new InvalidSourceException("[SinkConnection::selectSource] sourceList is null");
+		if(!checkSourceInSourceList(sourceId))
+			throw new InvalidSourceException("[SinkConnection::selectSource] source id is not in the source list");
 		 //emit the signal
-		this.getSocket().emit(sourceId);
+		//this.getSocket().emit(sourceId);
+		this.getSocket().emit(ConnectionConsts.CLIENT_C_SELECT, sourceId);
+		connectedSourceId = sourceId;
 		doneSelection = true;
 	}
 	
@@ -54,6 +59,24 @@ public class SinkConnection extends Connection{
 		}
 		return false;
 	}
+
+	/**
+	* checks whether the virtual conenction is still there
+	*/
+	public boolean isConnected(){
+		if(connectedSourceId!=null && !connectedSourceId.trim().isEmpty())
+			return checkSourceInSourceList(connectedSourceId);
+		else
+			return false;
+	}
+
+	/**
+	* get the sourcelisst
+	*/
+	public Set<Map.Entry<String,JsonElement>> getSourceList(){
+		return sourceList;
+	}
+
 	/**
 	* notify listeners
 	*/		
@@ -70,6 +93,10 @@ public class SinkConnection extends Connection{
 	  			throw new InvalidMessageException("[SinkConnection::notifyListeners] authresult is null or empty, invalid");
 	  		if(Boolean.parseBoolean(_authResult))
 		  		this.setAuthcated(true);
+		  	JsonObject _sourceList = message.getAsJsonObject(ConnectionConsts.MESSAGE_C_SOURCE_LIST);
+	  		if(_sourceList != null )
+	  			sourceList = _sourceList.entrySet();
+	  		else return;
 	  		Iterator<ConnectionListener> iterator = listeners.iterator();
 	  		while(iterator.hasNext()){
 	  			ConnectionListener _listener = iterator.next();
@@ -77,7 +104,12 @@ public class SinkConnection extends Connection{
 	  		}
 	  	}
 	  	else if(msgCode.equals(ConnectionConsts.SERVER_C_SOURCE_DISCONNECT)){
-	  		log("[SinkConnection] source disconnect, no more source");
+	  		JsonObject _sourceList = message.getAsJsonObject(ConnectionConsts.MESSAGE_C_SOURCE_LIST);
+	  		if(_sourceList != null )
+	  			sourceList = _sourceList.entrySet();
+	  		else
+	  			return;
+	  		log("[SinkConnection] source disconnect, source list:" + sourceList);
 	  		Iterator<ConnectionListener> iterator = listeners.iterator();
 	  		while(iterator.hasNext()){
 	  			ConnectionListener _listener = iterator.next();
@@ -104,6 +136,7 @@ public class SinkConnection extends Connection{
 	  		JsonObject _sourceList = message.getAsJsonObject(ConnectionConsts.MESSAGE_C_SOURCE_LIST);
 	  		if(_sourceList != null )
 	  			sourceList = _sourceList.entrySet();
+	  		else return;
 	  		log("[SinkConnection] source connect, list of sources:" + _sourceList.toString());
 	  		Iterator<ConnectionListener> iterator = listeners.iterator();
 	  		while(iterator.hasNext()){
