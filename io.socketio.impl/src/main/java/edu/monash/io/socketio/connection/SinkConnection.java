@@ -11,7 +11,7 @@ import java.util.*;
  * @author hoangnguyen
  */
 public class SinkConnection extends Connection{
-
+	
     /*list of sources to choose from*/
 	private Set<Map.Entry<String,JsonElement>> sourceList = null;
 	/*true if done selection*/

@@ -148,11 +148,11 @@ io.of(nsp).on(CLIENT_CONST.connect, function (socket) {
     //add details into the socket
     //retrieve later via this
     socket[CONNECTION_CONST.details] = details;
-
     ///////////////////////////////////////
     ///// AUTHENTICATE HERE ////////////
     ///////////////////////////////////////
     authcatedClients[socket.id] = true;
+    var _uname = getUsernameFromSource(details);
     //which type of client it is
     if(details[CONNECTION_CONST.clienttype] === CONNECTION_CONST.source){
       //add to sources
@@ -165,17 +165,20 @@ io.of(nsp).on(CLIENT_CONST.connect, function (socket) {
                           authresult : 'true', 
                           comment: '',
                         };
-      log("[auth] notify source about the authentication:"+ _authreply);
+      console.log("[auth] notify source about the authentication:", _authreply);
       socket.send(_authreply);
       //notify all the sinks that a new source has been connected
       var _msgToSink = {
             messagetype: SERVER_CONST.source_connect,
-            sourcelist: prepareSourcesList(sources),
+            sourcelist: prepareSourcesListWithUsername(sources, _uname),
       }
-      log("[auth] notify all sinks that new source has connected:"+ _msgToSink);
+      console.log("[auth] notify sinks that new source has connected:", _msgToSink);
       for(var _sinkid in sinks){
-        sinks[_sinkid].send(_msgToSink);
-        console.log('[auth] sending: ', _msgToSink, " to:", _sinkid);
+        console.log("sink uname:",sinks[_sinkid][CONNECTION_CONST.username], " _uname", _uname);
+        if(sinks[_sinkid].details[CONNECTION_CONST.username] === _uname){
+          sinks[_sinkid].send(_msgToSink);
+          console.log('[auth] sending: ', _msgToSink, " to:", _sinkid);
+        }
       }
 
     }
@@ -189,10 +192,10 @@ io.of(nsp).on(CLIENT_CONST.connect, function (socket) {
                 messagetype: SERVER_CONST.auth_return,
                 authresult: 'true', 
                 id : socket.id, 
-                sourcelist: prepareSourcesList(sources), // list of sources - removed some information
+                sourcelist: prepareSourcesListWithUsername(sources, _uname), // list of sources - removed some information
                 comment: ''
         };
-        log("[auth] notify the sink about the authenticaiton and list of sources:"+ _authreply);  
+        console.log("[auth] notify the sink about the authenticaiton and list of sources:", _authreply);  
         socket.send(_authreply);
 
     }
@@ -208,7 +211,7 @@ io.of(nsp).on(CLIENT_CONST.connect, function (socket) {
   * send to the sink, the sink can "replay" or ignore them
   */
   socket.on(CLIENT_CONST.selectsource, function(_sourceid){
-    log("[selectsource] from "+ socket.id +  " selectsource:" + _sourceid);
+    console.log("[selectsource] from ", socket.id,  " selectsource:", _sourceid);
     if(isSource(_sourceid, sources))  {
       if(connections.hasOwnProperty(_sourceid))
         connections[_sourceid].push(socket.id);
@@ -237,7 +240,7 @@ io.of(nsp).on(CLIENT_CONST.connect, function (socket) {
 
   /////////////// message ///////////////////
   socket.on(CLIENT_CONST.message, function(message){
-    log("[message] message from "+ socket.id + " message:", message);
+    console.log("[message] message from ", socket.id , " message:", message);
     // message from source
     if(isSource(socket.id, sources)){
       //distribute it to the sinks
@@ -255,20 +258,20 @@ io.of(nsp).on(CLIENT_CONST.connect, function (socket) {
         var _sourceIdOfTheSink = findSource(socket.id, connections);
         if(_sourceIdOfTheSink){
           // send to source
-          log("[message] send message to source:"+ _sourceIdOfTheSink);
+          console.log("[message] send message to source:", _sourceIdOfTheSink);
           sources[_sourceIdOfTheSink].send(message);  
           for(var _sink in connections[_sourceIdOfTheSink]){
             if(connections[_sourceIdOfTheSink][_sink] !== socket.id ){
-              log("[message] send message to (other) sink:"+ connections[_sourceIdOfTheSink][_sink]);
+              console.log("[message] send message to (other) sink:", connections[_sourceIdOfTheSink][_sink]);
               sinks[connections[_sourceIdOfTheSink][_sink]].send(message);
             }//end if
           }//end for
         }//end if
         else
-          log("[mesage]Cannot find source:" + socket.id + " in connections:" + connections);
+          console.log("[mesage]Cannot find source:" ,socket.id,  " in connections:" , connections);
       }
       else{
-        log("[message]The sink is not allowed to send command, allowed operations:"+
+        console.log("[message]The sink is not allowed to send command, allowed operations:",
                  socket[CONNECTION_CONST.details][MESSAGE_CONST.allowed_operations]);
       } 
     
@@ -283,13 +286,14 @@ io.of(nsp).on(CLIENT_CONST.connect, function (socket) {
   socket.on(CLIENT_CONST.disconnect, function(){
     //it is a source
     if(sources.hasOwnProperty(socket.id)){
+      var _uname = getUsernameFromSource(sources[socket.id].details);
       //remove the source from sources
       delete sources[socket.id];
       delete authcatedClients[socket.id];
       if(connections.hasOwnProperty(socket.id))  delete connections[socket.id];
       var _msgToSink = {
         messagetype: SERVER_CONST.source_disconnect,
-        sourcelist: prepareSourcesList(sources),
+        sourcelist: prepareSourcesListWithUsername(sources, _uname),
       };
       for(var _sinkid in sinks){
           sinks[_sinkid].send(_msgToSink);
@@ -369,6 +373,64 @@ function prepareSourcesList(_sourceList)
   //log("[prepareSourcesList]", _sources);
   return _sources;
 }
+/**
+* prepare source list belong to this username
+*/
+function prepareSourcesListWithUsername(_sourceList, _username)
+{
+  var _sources = {};
+  for (var _sid in _sourceList) {
+    var _details = _sourceList[_sid].details;
+    var _presentingDetails = {};
+    var _belongToThisUser = false;
+    //check username: note that there are two types of connections
+    //from library and from socket library directly
+    //from direct socket: {"username":"asource","appname":"edu.monash.io.socketio.test.TestSourceClient","comment":"a test for source client"}
+    //from library: in configuration of each channel
+    if(CONNECTION_CONST.username in _details){
+      for (var key in _details) {
+        if(key != CONNECTION_CONST.password && key != CONNECTION_CONST.clienttype)
+          _presentingDetails[key] = _details[key];           
+      }//end inner for
+      if(_details[CONNECTION_CONST.username]===_username){
+        _belongToThisUser = true;
+      }
+    }
+    else{
+      for(var key in _details){
+        if(key !== 'clienttype' && 'type' in _details[key] && _details[key] === 'channel'){
+          var _configuration = _details[key]['configuration'];
+          if(_configuration[CONNECTION_CONST.username] === _username)
+            _belongToThisUser = true;
+        }
+        _presentingDetails[key] = _details[key];
+        //TODO: remove password
+      }
+    }
+
+    if(_belongToThisUser)
+      _sources[_sid] = _presentingDetails;      
+
+  }//end outer for
+  //log("[prepareSourcesList]", _sources);
+  return _sources;
+}
+
+/**
+* get username from source information
+*/
+function getUsernameFromSource(_source){
+  if(CONNECTION_CONST.username in _source){
+      return _source[CONNECTION_CONST.username]
+  }
+  else{
+      for(var key in _source){
+        if(key !== 'clienttype' && 'type' in _source[key] && _source[key] === 'channel')
+          return _source[key]['configuration'][CONNECTION_CONST.username];
+      }
+  }
+}
+
 
 /*
 * checks whether this socket id is source
