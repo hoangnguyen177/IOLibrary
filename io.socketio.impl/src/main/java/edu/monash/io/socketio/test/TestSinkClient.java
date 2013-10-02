@@ -14,9 +14,9 @@ public class TestSinkClient{
 		//default one
 		sink = new SinkConnection();
 		JsonObject authInfo = new JsonObject();
-		authInfo.addProperty(ConnectionConsts.CONNECTION_C_USERNAME, "asource");
+		authInfo.addProperty(ConnectionConsts.CONNECTION_C_USERNAME, "hoangnguyen");
 		authInfo.addProperty(ConnectionConsts.CONNECTION_C_PASSWORD , "asink");
-		authInfo.addProperty("appname" , this.getClass().getName());
+		authInfo.addProperty("container" , this.getClass().getName());
 		authInfo.addProperty("comment" , "a test for sink client");
 		sink.setAuthInfo(authInfo);
 		try{

@@ -16,7 +16,7 @@ public class TestSourceClient{
 		JsonObject authInfo = new JsonObject();
 		authInfo.addProperty(ConnectionConsts.CONNECTION_C_USERNAME, "asource");
 		authInfo.addProperty(ConnectionConsts.CONNECTION_C_PASSWORD , "asource");
-		authInfo.addProperty("appname" , this.getClass().getName());
+		authInfo.addProperty("container" , this.getClass().getName());
 		authInfo.addProperty("comment" , "a test for source client");
 		source.setAuthInfo(authInfo);
 		try{

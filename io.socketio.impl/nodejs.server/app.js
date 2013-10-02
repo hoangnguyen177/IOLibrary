@@ -153,6 +153,7 @@ io.of(nsp).on(CLIENT_CONST.connect, function (socket) {
     ///////////////////////////////////////
     authcatedClients[socket.id] = true;
     var _uname = getUsernameFromSource(details);
+    log("New connection: uname=", _uname);
     //which type of client it is
     if(details[CONNECTION_CONST.clienttype] === CONNECTION_CONST.source){
       //add to sources
@@ -398,7 +399,7 @@ function prepareSourcesListWithUsername(_sourceList, _username)
     }
     else{
       for(var key in _details){
-        if(key !== 'clienttype' && 'type' in _details[key] && _details[key] === 'channel'){
+        if(key !== 'clienttype' && 'type' in _details[key] && _details[key]['type'] === 'channel'){
           var _configuration = _details[key]['configuration'];
           if(_configuration[CONNECTION_CONST.username] === _username)
             _belongToThisUser = true;
@@ -419,14 +420,14 @@ function prepareSourcesListWithUsername(_sourceList, _username)
 /**
 * get username from source information
 */
-function getUsernameFromSource(_source){
-  if(CONNECTION_CONST.username in _source){
-      return _source[CONNECTION_CONST.username]
+function getUsernameFromSource(_sourceDetails){
+  if(CONNECTION_CONST.username in _sourceDetails){
+      return _sourceDetails[CONNECTION_CONST.username]
   }
   else{
-      for(var key in _source){
-        if(key !== 'clienttype' && 'type' in _source[key] && _source[key] === 'channel')
-          return _source[key]['configuration'][CONNECTION_CONST.username];
+      for(var key in _sourceDetails){
+        if(key !== 'clienttype' && 'type' in _sourceDetails[key] && _sourceDetails[key]['type'] === 'channel')
+          return _sourceDetails[key]['configuration'][CONNECTION_CONST.username];
       }
   }
 }
