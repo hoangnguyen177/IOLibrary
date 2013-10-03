@@ -105,7 +105,8 @@ public class ConfigurationConsts{
 	public static final String OUT_DATA_TYPE = 	"out_datatype";
 
 	/*variable - data*/
-	public static final String DATA = "data";
+	public static final String IN_DATA = "in_data";
+	public static final String OUT_DATA = "out_data";	
 	/*variable - gui element*/
 	public static final String GUI_ELEMENT = "guielement";
 
@@ -115,6 +116,13 @@ public class ConfigurationConsts{
 	/*channel - type - choice - options*/
 	public static final String CHOICE_OPTIONS = "options";
 
+	/*channel -type - plot*/
+	public static final String TYPE_LINE_CHART = "line_chart";
+    public static final String LINE_CHART_ASPECT_RATIO = "aspect_ratio";
+
+    /*channel - data - update mode*/
+    public static final String DATA_UPDATE_MODE = "update_mode";
+	
 	//data type
 	public static enum DataType {
         INT, DOUBLE, BOOL, STRING, OBJECT, BYTEARRAY, TEXT, BINARY;				//TEXT and BINARY are two file types
@@ -138,6 +146,31 @@ public class ConfigurationConsts{
             return ss;
         }
     }
+
+    //update mode
+    public static enum UpdateMode {
+        APPEND, OVERWRITE;
+        public static UpdateMode fromString(String s) throws InvalidDataTypeException{
+            if (s != null) {
+                UpdateMode[] vs = values();
+                for (int i = 0; i < vs.length; i++) {
+                    if (vs[i].toString().equalsIgnoreCase(s)) {
+                        return vs[i];
+                    }
+                }
+            }
+            throw new InvalidDataTypeException("Datatype:" + s + " is not supported");
+        }
+        public static String[] stringValues() {
+            UpdateMode[] vs = values();
+            String[] ss = new String[vs.length];
+            for (int i = 0; i < vs.length; i++) {
+                ss[i] = vs[i].toString();
+            }
+            return ss;
+        }
+    }
+
 
 
 }

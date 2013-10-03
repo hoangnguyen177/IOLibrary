@@ -13,6 +13,7 @@ import edu.monash.io.iolibrary.exceptions.NotSupportException;
 import edu.monash.io.iolibrary.exceptions.InvalidDefinitionException;
 import edu.monash.io.iolibrary.exceptions.InvalidDataTypeException;
 import edu.monash.io.iolibrary.exceptions.InvalidIOTypeException;
+import edu.monash.io.iolibrary.exceptions.InvalidPathException;
 import edu.monash.io.iolibrary.iointerface.IOFactory;
 import edu.monash.io.iolibrary.iointerface.exceptions.IOFailException;
 import edu.monash.io.iolibrary.iointerface.BlockingIOInterface;
@@ -82,19 +83,23 @@ public class IOChannel extends IOObject{
 	// }
 
 	/*blocking io*/
-	public BlockingIOInterface getBlockingIO(boolean shared) throws NotSupportException{
+	public BlockingIOInterface getBlockingIO(boolean shared, String _subPath) throws NotSupportException, InvalidPathException{
 		String _path = this.getContainerId();
 		if(!shared)
 			_path += "." + this.getId(); 
+		if(_subPath.trim().isEmpty() || !variables.containsKey(_subPath))
+			throw new InvalidPathException("There is no variable:" + _subPath); 
 		return IOFactory.getInstance().getBlockingIOInterface(_path);
 	}
 
 	
 	/*non blocking io*/
-	public NonBlockingIOInterface getNonBlockingIO(boolean shared) throws NotSupportException{
+	public NonBlockingIOInterface getNonBlockingIO(boolean shared, String _subPath) throws NotSupportException, InvalidPathException{
 		String _path = this.getContainerId();
 		if(!shared)
 			_path += "." + this.getId(); 
+		if(_subPath.trim().isEmpty() || !variables.containsKey(_subPath))
+			throw new InvalidPathException("There is no variable:" + _subPath); 
 		return IOFactory.getInstance().getNonBlockingIOInterface(_path);
 	}
 

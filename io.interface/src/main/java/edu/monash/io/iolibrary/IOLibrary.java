@@ -81,7 +81,6 @@ public class IOLibrary{
 		return getNonBlockingIO(_definition);
 	}
 
-
 	/*********************************************/
 	private Map<String, IOObjectsManager> maps = new HashMap<String, IOObjectsManager>();
 

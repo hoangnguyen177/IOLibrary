@@ -94,7 +94,7 @@ public class IOContainer extends IOObject{
 			throw new InvalidPathException(path + " is not a valid path");
 		String _channelid = path.substring(0, firstDotPosition);
 		if(channels.containsKey(_channelid))
-			return channels.get(_channelid).getBlockingIO(this.sharedIo());
+			return channels.get(_channelid).getBlockingIO(this.sharedIo(), path.substring(firstDotPosition+1, path.length()));
 		else
 			throw new InvalidPathException("There is no channel:" + _channelid);
 	}	
@@ -108,7 +108,7 @@ public class IOContainer extends IOObject{
 			throw new InvalidPathException(path + " is not a valid path");
 		String _channelid = path.substring(0, firstDotPosition);
 		if(channels.containsKey(_channelid))
-			return channels.get(_channelid).getNonBlockingIO(this.sharedIo());
+			return channels.get(_channelid).getNonBlockingIO(this.sharedIo(), path.substring(firstDotPosition+1, path.length()));
 		else
 			throw new InvalidPathException("There is no channel:" + _channelid);
 	}

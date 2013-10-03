@@ -35,14 +35,15 @@
 			"in_datatype": "STRING",
 			"out_datatype": "OBJECT",
 			"guielement": "choice",
-			"data":[{"label": "option1", "description": "this is option 1"}, 
-					{"label": "option2", "description": "this is option 2"}]
+			"out_data":[{"label": "option1", "description": "this is option 1"}, 
+					{"label": "option2", "description": "this is option 2"}],
+			"in_data":""			
 		}, 
 		"output1":{
 			"type": "output",
 			"out_datatype": "STRING",
 			"guielement": "textarea",
-			"data": ""
+			"out_data": ""
 		}
 	}
 }
