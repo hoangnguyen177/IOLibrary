@@ -191,6 +191,11 @@ public class IOObjectsManager{
 		_nonBlocking.addDataHandler(path, handler);
 	}
 
+	public boolean hasDataHandler(String path)  throws InvalidPathException, NotSupportException{
+		NonBlockingIOInterface _nonBlocking = this.getNonBlockingIOInterface(path);
+		return _nonBlocking.hasDataHandler(path);
+	}
+
 	//BLOCKING
 	/*retrieve data held at specified path*/
 	public String getString(String path) throws InvalidPathException, NotSupportException, IOFailException{

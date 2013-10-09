@@ -47,6 +47,38 @@ public abstract class IO{
 	public abstract void putBinaryFile(String path, String filename, boolean append) 
 					throws InvalidPathException, NotSupportException, IOFailException;
 
+	//put string
+	public abstract void putString(String path, String value, boolean append) 
+					throws InvalidPathException, NotSupportException, IOFailException;
+
+	//put int
+	public abstract void putInt(String path, int value, boolean append) 
+					throws InvalidPathException, NotSupportException, IOFailException;
+
+	//double
+	public abstract void putDouble(String path, double value, boolean append) 
+					throws InvalidPathException, NotSupportException, IOFailException;
+
+	//boolean
+	public abstract void putBoolean(String path, boolean value, boolean append) 
+					throws InvalidPathException, NotSupportException, IOFailException;
+
+	//put string
+	public abstract void putString(String path, String value) 
+					throws InvalidPathException, NotSupportException, IOFailException;
+
+	//put int
+	public abstract void putInt(String path, int value) 
+					throws InvalidPathException, NotSupportException, IOFailException;
+
+	//double
+	public abstract void putDouble(String path, double value) 
+					throws InvalidPathException, NotSupportException, IOFailException;
+
+	//boolean
+	public abstract void putBoolean(String path, boolean value) 
+					throws InvalidPathException, NotSupportException, IOFailException;
+
 
 
 	/*****************************/

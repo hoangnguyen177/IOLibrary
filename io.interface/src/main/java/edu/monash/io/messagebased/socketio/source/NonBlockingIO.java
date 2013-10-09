@@ -80,6 +80,13 @@ public class NonBlockingIO implements NonBlockingIOInterface{
 			handlers.put(path, handler);
 	}
 
+	/**
+	* count the number of data handlers
+	*/
+	public boolean hasDataHandler(String path){
+		return handlers.containsKey(path);
+	}
+
 
 	/*put value to specified path*/
 	public void put(String path, JsonObject value, boolean append) throws IOFailException{

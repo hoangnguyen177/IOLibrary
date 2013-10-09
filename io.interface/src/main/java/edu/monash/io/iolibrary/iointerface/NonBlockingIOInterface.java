@@ -20,5 +20,7 @@ public interface NonBlockingIOInterface extends IOInterface{
 	
 	/*add handler so that it can be called back, note if wrong handler, string is return*/
 	public void addDataHandler(String path, DataHandler handler);
+	/*count the number of data handlers*/
+	public boolean hasDataHandler(String path);
 }
 

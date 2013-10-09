@@ -117,6 +117,11 @@ public class NonBlockingIO extends IO{
 	}
 
 
+	public boolean hasDataHandler(String path) throws InvalidPathException, NotSupportException{
+		return this.getIOObjects().hasDataHandler(path);
+	}
+
+
 
 }
 
