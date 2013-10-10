@@ -75,6 +75,7 @@ public class BlockingIO implements BlockingIOInterface{
 		jObject.addProperty(MessageConsts.APPEND , append);
 		//add path, value and append
 		try{
+			this.waitTillSinkConnect();
 			source.send(jObject);
 		}
 		catch(ConnectionFailException e){
@@ -97,6 +98,7 @@ public class BlockingIO implements BlockingIOInterface{
 		jObject.addProperty(MessageConsts.APPEND , append);
 		//add path, value and append
 		try{
+			this.waitTillSinkConnect();
 			source.send(jObject);
 		}
 		catch(ConnectionFailException e){
@@ -118,6 +120,7 @@ public class BlockingIO implements BlockingIOInterface{
 		jObject.addProperty(MessageConsts.APPEND , append);
 		//add path, value and append
 		try{
+			this.waitTillSinkConnect();
 			source.send(jObject);
 		}
 		catch(ConnectionFailException e){
@@ -139,6 +142,7 @@ public class BlockingIO implements BlockingIOInterface{
 		jObject.addProperty(MessageConsts.APPEND , append);
 		//add path, value and append
 		try{
+			this.waitTillSinkConnect();
 			source.send(jObject);
 		}
 		catch(ConnectionFailException e){
@@ -160,6 +164,7 @@ public class BlockingIO implements BlockingIOInterface{
 		jObject.addProperty(MessageConsts.APPEND , append);
 		//add path, value and append
 		try{
+			this.waitTillSinkConnect();
 			source.send(jObject);
 		}
 		catch(ConnectionFailException e){
@@ -185,6 +190,7 @@ public class BlockingIO implements BlockingIOInterface{
 
 		//add path, value and append
 		try{
+			this.waitTillSinkConnect();
 			source.send(jObject);
 		}
 		catch(ConnectionFailException e){
@@ -210,6 +216,7 @@ public class BlockingIO implements BlockingIOInterface{
 			jObject.addProperty(MessageConsts.FILE_NAME, filename);
 			jObject.addProperty(MessageConsts.APPEND , append);
 			//add path, value and append
+			this.waitTillSinkConnect();
 			source.send(jObject);
 		}
 		catch(FileNotFoundException e){
@@ -239,6 +246,7 @@ public class BlockingIO implements BlockingIOInterface{
 			jObject.addProperty(MessageConsts.FILE_NAME, filename);
 			jObject.addProperty(MessageConsts.APPEND , append);
 			//add path, value and append
+			this.waitTillSinkConnect();
 			source.send(jObject);
 		}
 		catch(FileNotFoundException e){
@@ -281,6 +289,17 @@ public class BlockingIO implements BlockingIOInterface{
 	}
 
 	/**************************************/
+	//wait till a sink connect
+	private void waitTillSinkConnect(){
+		while(source.getNumberOfSinks()<=0){
+			try{
+				Thread.sleep(100);
+			}	
+			catch(InterruptedException e){}			
+		}
+	}
+
+
 	private synchronized JsonElement get(String path, DataType _dataType){
 		boolean _wait = true;
 		if(messages.containsKey(path)){
