@@ -112,13 +112,13 @@ public class ConfigurationConsts{
 
 
 	/*channel - type - choice*/
-	public static final String TYPE_CHOICE = "choice";
+	// public static final String TYPE_CHOICE = "choice";
 	/*channel - type - choice - options*/
 	public static final String CHOICE_OPTIONS = "options";
 
 	/*channel -type - plot*/
-	public static final String TYPE_LINE_CHART = "line_chart";
-    public static final String LINE_CHART_ASPECT_RATIO = "aspect_ratio";
+	// public static final String TYPE_LINE_CHART = "line_chart";
+ //    public static final String LINE_CHART_ASPECT_RATIO = "aspect_ratio";
 
     /*channel - data - update mode*/
     public static final String DATA_UPDATE_MODE = "update_mode";

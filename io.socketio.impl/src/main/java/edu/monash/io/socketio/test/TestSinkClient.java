@@ -13,7 +13,10 @@ public class TestSinkClient{
 		System.out.println("TEtSinkClient constructor");
 		//default one
 		sink = new SinkConnection();
+		sink.setHost("localhost");
+		sink.setPort(9090);
 		JsonObject authInfo = new JsonObject();
+		
 		authInfo.addProperty(ConnectionConsts.CONNECTION_C_USERNAME, "hoangnguyen");
 		authInfo.addProperty(ConnectionConsts.CONNECTION_C_PASSWORD , "asink");
 		authInfo.addProperty("container" , this.getClass().getName());
