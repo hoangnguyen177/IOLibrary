@@ -125,7 +125,7 @@ public class ConfigurationConsts{
 	
 	//data type
 	public static enum DataType {
-        INT, DOUBLE, BOOL, STRING, OBJECT, BYTEARRAY, TEXT, BINARY, GENERAL, ARRAY_INT, ARRAY_DOUBLE, ARRAY_STRING, ARRAY_GENERAL;
+        INT, DOUBLE, BOOL, STRING, OBJECT, COMMA_SEPERATED_STRING, JSON_STRING, BYTEARRAY, TEXT, BINARY, GENERAL, ARRAY_INT, ARRAY_DOUBLE, ARRAY_STRING, ARRAY_GENERAL;
         //TEXT and BINARY are two file types, BYTEARRAY, TEXT, BINARY are not yet supported on the actor side
         public static DataType fromString(String s) throws InvalidDataTypeException{
             if (s != null) {
