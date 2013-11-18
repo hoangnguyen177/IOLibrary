@@ -17,6 +17,14 @@ var PG_DATABASE_CONST = {
   host    : 'localhost'   ,
   database: 'server'      ,
 };
+//using mongodb instead
+var MONGO_DATABASE_CONST = {
+  username: 'hoangnguyen' ,
+  password: 'pass'        ,
+  port    : 27017         ,
+  host    : 'localhost'   ,
+  database: 'messages'      ,
+};
 
 //events header from cleint
 var CLIENT_CONST = {
@@ -95,6 +103,9 @@ var MESSAGE_CONST = {
 /////////////////////////////////////////////////////
 //Main methods
 /////////////////////////////////////////////////////
+//note:  the database was not used to record the definition of sources/sinks
+// it is only used to store messages, which can be queried by the sinks later on
+/////
 var DEBUG = true;
 
 var express = require('express')
@@ -105,7 +116,22 @@ var express = require('express')
 
 
 var  port = parseInt(process.argv[2], 10) || CONNECTION_CONF.port
-     , nsp = process.argv[3] || CONNECTION_CONF.nsp;
+     , nsp = process.argv[3] || CONNECTION_CONF.nsp
+     , usingdb = parseBoolean(process.argv[4]) || false
+     ;
+
+
+if(usingdb){
+  console.log("----- messages will be stored in database ---------");     
+  var databaseUrl = MONGO_DATABASE_CONST.username + ":" + MONGO_DATABASE_CONST.password + 
+                    "@" + MONGO_DATABASE_CONST.host+ "/" + MONGO_DATABASE_CONST.database; 
+  if(DEBUG)
+    console.log("database url:" + databaseUrl);                  
+  var collections = ["definitions", "data"]; //definitions will not be used atm
+  var db = require("mongojs").connect(databaseUrl, collections);
+}
+
+
 
 // routing
 app.get(nsp, function (req, res) {
@@ -148,6 +174,7 @@ io.of(nsp).on(CLIENT_CONST.connect, function (socket) {
     //add details into the socket
     //retrieve later via this
     socket[CONNECTION_CONST.details] = details;
+    //console.log("details=" + JSON.stringify(details));
     ///////////////////////////////////////
     ///// AUTHENTICATE HERE ////////////
     ///////////////////////////////////////
@@ -210,6 +237,7 @@ io.of(nsp).on(CLIENT_CONST.connect, function (socket) {
   * this one is called when sink selects a source to connect to
   * later can query data, get all messages so far from this source, and 
   * send to the sink, the sink can "replay" or ignore them
+  * add an option of querying messages so far, go to mongodb and get messages
   */
   socket.on(CLIENT_CONST.selectsource, function(_sourceid){
     console.log("[selectsource] from ", socket.id,  " selectsource:", _sourceid);
@@ -241,7 +269,15 @@ io.of(nsp).on(CLIENT_CONST.connect, function (socket) {
 
   /////////////// message ///////////////////
   socket.on(CLIENT_CONST.message, function(message){
-    console.log("[message] message from ", socket.id , " message:", message);
+    log("[message] message from ", socket.id , " message:", JSON.stringify(message));
+    //store message here
+    var _messageToStore = {'socketid':socket.id, 'message':message, 'timestamp': Date.now()};
+    if(usingdb){
+      db.data.save(_messageToStore, function(err, saved) {
+        if( err || !saved ) log("!!!!!!!!!!!!!!!!!Data not saved");
+        else log("____Message saved");
+      });
+    }
     // message from source
     if(isSource(socket.id, sources)){
       //distribute it to the sinks
@@ -355,6 +391,28 @@ server.listen(port, function() {
 //////////////////////////////////////////////////////
 // misc methods
 //////////////////////////////////////////////////////
+/**
+* parse string to boolean
+*/
+function parseBoolean(string) {
+  switch (String(string).toLowerCase()) {
+    case "true":
+    case "1":
+    case "yes":
+    case "y":
+      return true;
+    case "false":
+    case "0":
+    case "no":
+    case "n":
+      return false;
+    default:
+      //you could throw an error, but 'undefined' seems a more logical reply
+      return undefined;
+  }
+}
+
+
 /**
 * source list contains more information than needed to send to sinks
 * remove some unnnecessary information

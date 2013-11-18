@@ -1,8 +1,9 @@
 {
-     "name": "simple_chat",
-     "description": "example chat application with socket.io",
+     "name": "nodejs.server",
+     "description": "message server application with socket.io",
      "version": "0.0.1",
      "dependencies": {
+     	"mongojs":"",
         "express": "",
         "socket.io": "nkzawa/socket.io"
      }
