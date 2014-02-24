@@ -14,7 +14,7 @@ public class TestSinkClient{
 		//default one
 		sink = new SinkConnection();
 		sink.setHost("localhost");
-		sink.setPort(9090);
+		sink.setPort(8080);
 		JsonObject authInfo = new JsonObject();
 		
 		authInfo.addProperty(ConnectionConsts.CONNECTION_C_USERNAME, "hoangnguyen");
@@ -93,7 +93,9 @@ public class TestSinkClient{
 					msg = br.readLine();
 					JsonObject jObject = new JsonObject();
 					jObject.addProperty("messagetype", ConnectionConsts.CLIENT_C_MESSAGE);
-					jObject.addProperty(ConnectionConsts.CLIENT_C_MESSAGE , msg);		
+					jObject.addProperty("path" , "TestIOLibrary.ioChannel1.output1");	
+					jObject.addProperty("datatype" , "STRING");
+					jObject.addProperty("data" , msg);
 					sink.send(jObject);	
 				}	
 		    } 
