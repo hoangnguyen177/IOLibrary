@@ -14,7 +14,7 @@ public class TestIOLibrary{
 			file = args[0];
 		try{
 			BlockingIO iolibrary = IOLibrary.getInstance().getBlockingIOFromFile(file);
-			iolibrary.putString("TestIOLibrary.ioChannel1.output1", "hello, its Hoang");
+			/*iolibrary.putString("TestIOLibrary.ioChannel1.output1", "hello, its Hoang");
 	    	String msg = "";
 			while(!msg.equals("q")){
 				System.out.print("Enter path to send: ");
@@ -23,7 +23,7 @@ public class TestIOLibrary{
 				System.out.print("Enter message to send, q to quit: ");
 	    		msg = br.readLine();
 				iolibrary.putString(path, msg);
-			}	
+			}*/	
 		}
 		catch(NotSupportException e){
 			e.printStackTrace();

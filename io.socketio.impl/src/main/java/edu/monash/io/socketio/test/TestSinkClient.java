@@ -14,10 +14,10 @@ public class TestSinkClient{
 		//default one
 		sink = new SinkConnection();
 		sink.setHost("localhost");
-		sink.setPort(8080);
+		sink.setPort(9090);
 		JsonObject authInfo = new JsonObject();
 		
-		authInfo.addProperty(ConnectionConsts.CONNECTION_C_USERNAME, "hoangnguyen");
+		authInfo.addProperty(ConnectionConsts.CONNECTION_C_USERNAME, "test");
 		authInfo.addProperty(ConnectionConsts.CONNECTION_C_PASSWORD , "asink");
 		authInfo.addProperty("container" , this.getClass().getName());
 		authInfo.addProperty("comment" , "a test for sink client");

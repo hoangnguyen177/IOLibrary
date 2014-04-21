@@ -126,7 +126,8 @@ public class ConfigurationConsts{
 	//data type
 	// IMAGE data will be sent as base64 string
 	public static enum DataType {
-        INT, DOUBLE, BOOL, STRING, OBJECT, COMMA_SEPERATED_STRING, JSON_STRING, BYTEARRAY, TEXT, BINARY, GENERAL, ARRAY_INT, ARRAY_DOUBLE, ARRAY_STRING, ARRAY_GENERAL, IMAGE;
+        INT, DOUBLE, BOOL, STRING, OBJECT, COMMA_SEPERATED_STRING, JSON_STRING, BYTEARRAY, 
+        TEXT, BINARY, GENERAL, ARRAY_INT, ARRAY_DOUBLE, ARRAY_STRING, ARRAY_GENERAL, IMAGE;
         //TEXT and BINARY are two file types, BYTEARRAY, TEXT, BINARY are not yet supported on the actor side
         public static DataType fromString(String s) throws InvalidDataTypeException{
             if (s != null) {
@@ -137,7 +138,7 @@ public class ConfigurationConsts{
                     }
                 }
             }
-            throw new InvalidDataTypeException("Datatype:" + s + " is not supported");
+            throw new InvalidDataTypeException("[ConfigurationConsts:Datatype]" + s + " is not supported");
         }
         public static String[] stringValues() {
             DataType[] vs = values();
