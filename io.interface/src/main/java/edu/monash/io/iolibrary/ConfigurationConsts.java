@@ -124,10 +124,10 @@ public class ConfigurationConsts{
     public static final String DATA_UPDATE_MODE = "update_mode";
 	
 	//data type
-	// IMAGE data will be sent as base64 string
+	// IMAGE data will be sent as base64 string, same as VIDEO
 	public static enum DataType {
         INT, DOUBLE, BOOL, STRING, OBJECT, COMMA_SEPERATED_STRING, JSON_STRING, BYTEARRAY, 
-        TEXT, BINARY, GENERAL, ARRAY_INT, ARRAY_DOUBLE, ARRAY_STRING, ARRAY_GENERAL, IMAGE;
+        TEXT, BINARY, GENERAL, ARRAY_INT, ARRAY_DOUBLE, ARRAY_STRING, ARRAY_GENERAL, IMAGE, VIDEO;
         //TEXT and BINARY are two file types, BYTEARRAY, TEXT, BINARY are not yet supported on the actor side
         public static DataType fromString(String s) throws InvalidDataTypeException{
             if (s != null) {
