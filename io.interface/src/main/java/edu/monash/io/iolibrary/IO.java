@@ -80,9 +80,7 @@ public abstract class IO{
 					throws InvalidPathException, NotSupportException, IOFailException;
 
 
-
 	/*****************************/
 	//private variables
 	private IOObjectsManager objects = null;
-	
 }

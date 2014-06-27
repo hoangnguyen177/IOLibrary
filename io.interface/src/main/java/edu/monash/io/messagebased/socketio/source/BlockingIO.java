@@ -75,7 +75,8 @@ public class BlockingIO implements BlockingIOInterface{
 		jObject.addProperty(MessageConsts.APPEND , append);
 		//add path, value and append
 		try{
-			this.waitTillSinkConnect();
+			if(waitForSink)
+				this.waitTillSinkConnect();
 			source.send(jObject);
 		}
 		catch(ConnectionFailException e){
@@ -98,7 +99,8 @@ public class BlockingIO implements BlockingIOInterface{
 		jObject.addProperty(MessageConsts.APPEND , append);
 		//add path, value and append
 		try{
-			this.waitTillSinkConnect();
+			if(waitForSink)
+				this.waitTillSinkConnect();
 			source.send(jObject);
 		}
 		catch(ConnectionFailException e){
@@ -120,7 +122,8 @@ public class BlockingIO implements BlockingIOInterface{
 		jObject.addProperty(MessageConsts.APPEND , append);
 		//add path, value and append
 		try{
-			this.waitTillSinkConnect();
+			if(waitForSink)
+				this.waitTillSinkConnect();
 			source.send(jObject);
 		}
 		catch(ConnectionFailException e){
@@ -142,7 +145,8 @@ public class BlockingIO implements BlockingIOInterface{
 		jObject.addProperty(MessageConsts.APPEND , append);
 		//add path, value and append
 		try{
-			this.waitTillSinkConnect();
+			if(waitForSink)
+				this.waitTillSinkConnect();
 			source.send(jObject);
 		}
 		catch(ConnectionFailException e){
@@ -164,7 +168,8 @@ public class BlockingIO implements BlockingIOInterface{
 		jObject.addProperty(MessageConsts.APPEND , append);
 		//add path, value and append
 		try{
-			this.waitTillSinkConnect();
+			if(waitForSink)
+				this.waitTillSinkConnect();
 			source.send(jObject);
 		}
 		catch(ConnectionFailException e){
@@ -190,7 +195,8 @@ public class BlockingIO implements BlockingIOInterface{
 
 		//add path, value and append
 		try{
-			this.waitTillSinkConnect();
+			if(waitForSink)
+				this.waitTillSinkConnect();
 			source.send(jObject);
 		}
 		catch(ConnectionFailException e){
@@ -216,7 +222,8 @@ public class BlockingIO implements BlockingIOInterface{
 			jObject.addProperty(MessageConsts.FILE_NAME, filename);
 			jObject.addProperty(MessageConsts.APPEND , append);
 			//add path, value and append
-			this.waitTillSinkConnect();
+			if(waitForSink)
+				this.waitTillSinkConnect();
 			source.send(jObject);
 		}
 		catch(FileNotFoundException e){
@@ -246,7 +253,8 @@ public class BlockingIO implements BlockingIOInterface{
 			jObject.addProperty(MessageConsts.FILE_NAME, filename);
 			jObject.addProperty(MessageConsts.APPEND , append);
 			//add path, value and append
-			this.waitTillSinkConnect();
+			if(waitForSink)
+				this.waitTillSinkConnect();
 			source.send(jObject);
 		}
 		catch(FileNotFoundException e){
@@ -287,6 +295,15 @@ public class BlockingIO implements BlockingIOInterface{
 	public JsonObject getObject(String path){
 		return get(path, DataType.OBJECT).getAsJsonObject();		
 	}
+	/*set wait for sink*/
+	public void setWaitForSink(boolean _wait){
+		waitForSink = _wait;
+	}
+
+	public boolean getWaitForSink(){
+		return waitForSink;
+	}
+
 
 	/**************************************/
 	//wait till a sink connect
@@ -340,6 +357,7 @@ public class BlockingIO implements BlockingIOInterface{
 	}
 
 	//private variables
+	private boolean waitForSink   = true;
 	private JsonObject definition = null;
 	private SourceConnection source = null;
 	private Map<String, JsonObject> messages = new HashMap<String, JsonObject>();

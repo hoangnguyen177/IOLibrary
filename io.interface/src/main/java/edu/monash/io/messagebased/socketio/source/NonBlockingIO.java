@@ -99,7 +99,8 @@ public class NonBlockingIO implements NonBlockingIOInterface{
 		jObject.addProperty(MessageConsts.APPEND , append);
 		//add path, value and append
 		try{
-			this.waitTillSinkConnect();
+			if(waitForSink)
+				this.waitTillSinkConnect();
 			source.send(jObject);
 		}
 		catch(ConnectionFailException e){
@@ -122,7 +123,8 @@ public class NonBlockingIO implements NonBlockingIOInterface{
 		jObject.addProperty(MessageConsts.APPEND , append);
 		//add path, value and append
 		try{
-			this.waitTillSinkConnect();
+			if(waitForSink)
+				this.waitTillSinkConnect();
 			source.send(jObject);
 		}
 		catch(ConnectionFailException e){
@@ -144,7 +146,8 @@ public class NonBlockingIO implements NonBlockingIOInterface{
 		jObject.addProperty(MessageConsts.APPEND , append);
 		//add path, value and append
 		try{
-			this.waitTillSinkConnect();
+			if(waitForSink)
+				this.waitTillSinkConnect();
 			source.send(jObject);
 		}
 		catch(ConnectionFailException e){
@@ -166,7 +169,8 @@ public class NonBlockingIO implements NonBlockingIOInterface{
 		jObject.addProperty(MessageConsts.APPEND , append);
 		//add path, value and append
 		try{
-			this.waitTillSinkConnect();
+			if(waitForSink)
+				this.waitTillSinkConnect();
 			source.send(jObject);
 		}
 		catch(ConnectionFailException e){
@@ -188,7 +192,8 @@ public class NonBlockingIO implements NonBlockingIOInterface{
 		jObject.addProperty(MessageConsts.APPEND , append);
 		//add path, value and append
 		try{
-			this.waitTillSinkConnect();
+			if(waitForSink)
+				this.waitTillSinkConnect();
 			source.send(jObject);
 		}
 		catch(ConnectionFailException e){
@@ -211,7 +216,8 @@ public class NonBlockingIO implements NonBlockingIOInterface{
 
 		//add path, value and append
 		try{
-			this.waitTillSinkConnect();
+			if(waitForSink)
+				this.waitTillSinkConnect();
 			source.send(jObject);
 		}
 		catch(ConnectionFailException e){
@@ -237,7 +243,8 @@ public class NonBlockingIO implements NonBlockingIOInterface{
 			jObject.addProperty(MessageConsts.FILE_NAME, filename);
 			jObject.addProperty(MessageConsts.APPEND , append);
 			//add path, value and append
-			this.waitTillSinkConnect();
+			if(waitForSink)
+				this.waitTillSinkConnect();
 			source.send(jObject);
 		}
 		catch(FileNotFoundException e){
@@ -267,7 +274,8 @@ public class NonBlockingIO implements NonBlockingIOInterface{
 			jObject.addProperty(MessageConsts.FILE_NAME, filename);
 			jObject.addProperty(MessageConsts.APPEND , append);
 			//add path, value and append
-			this.waitTillSinkConnect();
+			if(waitForSink)
+				this.waitTillSinkConnect();
 			source.send(jObject);
 		}
 		catch(FileNotFoundException e){
@@ -285,6 +293,16 @@ public class NonBlockingIO implements NonBlockingIOInterface{
 
 	}
 
+
+
+	/*set wait for sink*/
+	public void setWaitForSink(boolean _wait){
+		waitForSink = _wait;
+	}
+
+	public boolean getWaitForSink(){
+		return waitForSink;
+	}
 
 
 	/***************************************/
@@ -347,5 +365,5 @@ public class NonBlockingIO implements NonBlockingIOInterface{
 	private JsonObject definition = null;
 	private Map<String, DataHandler> handlers = new HashMap<String, DataHandler>();
 	private SourceConnection source = null;
-
+	private boolean waitForSink = true;
 }

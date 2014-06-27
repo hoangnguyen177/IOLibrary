@@ -53,4 +53,8 @@ public interface IOInterface{
 	/*get the definition of the operation*/
 	public String getDefinition();
 
+	public void setWaitForSink(boolean _wait);
+
+	public boolean getWaitForSink();
+
 }
