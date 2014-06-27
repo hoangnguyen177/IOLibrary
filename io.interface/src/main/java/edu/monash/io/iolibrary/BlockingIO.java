@@ -135,4 +135,14 @@ public class BlockingIO extends IO{
 	}
 
 
+	public void setWaitForSink(String path, boolean _wait)
+		throws InvalidPathException, NotSupportException, IOFailException{
+		this.getIOObjects().setWaitingForSink(path, _wait, true);
+	}
+
+	public boolean getWaitForSink(String path)
+		throws InvalidPathException, NotSupportException, IOFailException {
+		return this.getIOObjects().getWaitingForSink(path, true);
+	}
+
 }

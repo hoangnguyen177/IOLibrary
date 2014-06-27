@@ -83,6 +83,8 @@ public class IOObjectsManager{
 		return IOFactory.getInstance().supportNonBlockingIO();
 	}
 
+
+
 	/**
 	* get the blocking io interface corresponding to the given path
 	*/
@@ -123,6 +125,21 @@ public class IOObjectsManager{
 		else
 			return this.getNonBlockingIOInterface(path);
 	}
+
+	public void setWaitingForSink(String path, boolean waiting, boolean blocking) throws InvalidPathException, 
+																NotSupportException, IOFailException
+	{
+		this.getIOInterface(path, blocking).setWaitForSink(waiting);
+	}
+
+	public boolean getWaitingForSink(String path, boolean blocking) throws InvalidPathException, 
+																NotSupportException, IOFailException
+	{
+		return this.getIOInterface(path, blocking).getWaitForSink();
+	}
+
+
+
 	/*put value to specified path*/
 	public void put(String path, JsonObject value, boolean append, boolean blocking) throws InvalidPathException, 
 																NotSupportException, IOFailException

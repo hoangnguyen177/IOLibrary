@@ -80,6 +80,12 @@ public abstract class IO{
 					throws InvalidPathException, NotSupportException, IOFailException;
 
 
+	public abstract void setWaitForSink(String path, boolean _wait)
+					throws InvalidPathException, NotSupportException, IOFailException;
+
+	public abstract boolean getWaitForSink(String path)
+					throws InvalidPathException, NotSupportException, IOFailException;
+
 	/*****************************/
 	//private variables
 	private IOObjectsManager objects = null;

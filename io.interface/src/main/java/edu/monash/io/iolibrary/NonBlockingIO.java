@@ -122,6 +122,15 @@ public class NonBlockingIO extends IO{
 	}
 
 
+	public void setWaitForSink(String path, boolean _wait)
+		throws InvalidPathException, NotSupportException, IOFailException{
+		this.getIOObjects().setWaitingForSink(path, _wait, false);
+	}
+
+	public boolean getWaitForSink(String path)
+		throws InvalidPathException, NotSupportException, IOFailException{
+		return this.getIOObjects().getWaitingForSink(path, false);
+	}
 
 }
 
