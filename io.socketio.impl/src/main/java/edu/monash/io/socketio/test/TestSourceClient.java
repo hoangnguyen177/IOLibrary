@@ -12,9 +12,11 @@ public class TestSourceClient{
 	public TestSourceClient(){
 		//default one
 		source = new SourceConnection();
+		source.setHost("localhost");
+		source.setPort(9090);
 		//add auth
 		JsonObject authInfo = new JsonObject();
-		authInfo.addProperty(ConnectionConsts.CONNECTION_C_USERNAME, "test");
+		authInfo.addProperty(ConnectionConsts.CONNECTION_C_USERNAME, "hoangnguyen");
 		authInfo.addProperty(ConnectionConsts.CONNECTION_C_PASSWORD , "asource");
 		authInfo.addProperty("container" , this.getClass().getName());
 		authInfo.addProperty("comment" , "a test for source client");

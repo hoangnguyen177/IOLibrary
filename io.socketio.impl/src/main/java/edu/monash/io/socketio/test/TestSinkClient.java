@@ -5,6 +5,8 @@ import edu.monash.io.socketio.exceptions.*;
 import com.google.gson.*;
 import java.io.*;
 
+import java.sql.Timestamp;
+import java.util.Date;
 public class TestSinkClient{
 	//sink
 	final SinkConnection sink;
@@ -17,7 +19,7 @@ public class TestSinkClient{
 		sink.setPort(9090);
 		JsonObject authInfo = new JsonObject();
 		
-		authInfo.addProperty(ConnectionConsts.CONNECTION_C_USERNAME, "test");
+		authInfo.addProperty(ConnectionConsts.CONNECTION_C_USERNAME, "hoangnguyen");
 		authInfo.addProperty(ConnectionConsts.CONNECTION_C_PASSWORD , "asink");
 		authInfo.addProperty("container" , this.getClass().getName());
 		authInfo.addProperty("comment" , "a test for sink client");
@@ -68,7 +70,10 @@ public class TestSinkClient{
 			    	BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 					source = br.readLine();
 					//sink.getSocket().emit(ConnectionConsts.CLIENT_C_SELECT, source);
-					sink.selectSource(source);
+					Date _newDate = new Date();
+					Timestamp _newTimestamp = new Timestamp(_newDate.getTime());	
+					//sink.selectSource(source, _newTimestamp);
+					sink.selectSource(source, null);
 				} catch (IOException ioe) {
 			        System.out.println("IO error trying to read your name!");
 			        System.exit(1);

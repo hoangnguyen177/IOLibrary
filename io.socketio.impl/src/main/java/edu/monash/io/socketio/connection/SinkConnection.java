@@ -6,6 +6,7 @@ import edu.monash.io.socketio.exceptions.*;
 //java util
 import java.util.*;
 
+import java.sql.Timestamp;
 /**
  * SinkConnection
  * @author hoangnguyen
@@ -32,14 +33,14 @@ public class SinkConnection extends Connection{
 	/**
 	* select a source from the source list
 	*/
-	public void selectSource(String sourceId) throws UnauthcatedClientException, InvalidSourceException{
+	public void selectSource(String sourceId, Timestamp timeStamp) throws UnauthcatedClientException, InvalidSourceException{
 		if(!authcated())
 			throw new UnauthcatedClientException("[SinkConnection::selectSource] not authcated yet");
 		if(!checkSourceInSourceList(sourceId))
 			throw new InvalidSourceException("[SinkConnection::selectSource] source id is not in the source list");
 		 //emit the signal
 		//this.getSocket().emit(sourceId);
-		this.getSocket().emit(ConnectionConsts.CLIENT_C_SELECT, sourceId);
+		this.getSocket().emit(ConnectionConsts.CLIENT_C_SELECT, sourceId, timeStamp);
 		connectedSourceId = sourceId;
 		doneSelection = true;
 	}
