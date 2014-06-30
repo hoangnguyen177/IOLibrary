@@ -14,8 +14,9 @@ public class TestIOLibrary{
 			file = args[0];
 		try{
 			BlockingIO iolibrary = IOLibrary.getInstance().getBlockingIOFromFile(file);
-			iolibrary.putString("TestIOLibrary.ioChannel1.output1", "hello, its Hoang");
-	    	String msg = "";
+			iolibrary.setWaitForSink("TestIOLibrary.ioChannel1.*", true);
+	    	iolibrary.putString("TestIOLibrary.ioChannel1.output1", "hello, its Hoang");
+			String msg = "";
 			while(!msg.equals("q")){
 				System.out.print("Enter path to send: ");
 	    		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));

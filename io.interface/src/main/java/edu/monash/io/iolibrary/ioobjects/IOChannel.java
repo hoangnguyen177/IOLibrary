@@ -91,10 +91,9 @@ public class IOChannel extends IOObject{
 		String _path = this.getContainerId();
 		if(!shared)
 			_path += "." + this.getId(); 
-		if(_subPath.trim().isEmpty() || !variables.containsKey(_subPath))
+		if(_subPath.trim().isEmpty() || (!variables.containsKey(_subPath) && !"*".equals(_subPath.trim())) )
 			throw new InvalidPathException("There is no variable:" + _subPath); 
 		BlockingIOInterface _blockingInterface= IOFactory.getInstance().getBlockingIOInterface(_path);
-		_blockingInterface.setWaitForSink(waitforsink);
 		return _blockingInterface;
 	}
 
@@ -104,11 +103,10 @@ public class IOChannel extends IOObject{
 		String _path = this.getContainerId();
 		if(!shared)
 			_path += "." + this.getId(); 
-		if(_subPath.trim().isEmpty() || !variables.containsKey(_subPath))
+		if(_subPath.trim().isEmpty() || (!variables.containsKey(_subPath) && !"*".equals(_subPath.trim())) )
 			throw new InvalidPathException("There is no variable:" + _subPath); 
 //		return IOFactory.getInstance().getNonBlockingIOInterface(_path);
 		NonBlockingIOInterface _nonblockingInterface= IOFactory.getInstance().getNonBlockingIOInterface(_path);
-		_nonblockingInterface.setWaitForSink(waitforsink);
 		return _nonblockingInterface;
 	}
 
