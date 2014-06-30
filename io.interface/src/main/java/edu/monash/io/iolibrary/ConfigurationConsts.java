@@ -100,6 +100,8 @@ public class ConfigurationConsts{
 	
 	
 	/*variable*/
+	/*wait for sink*/
+	public static final String WAIT_FOR_SINK =  "waitforsink";
 	/*variable -data type*/
 	public static final String IN_DATA_TYPE  = 	"in_datatype";
 	public static final String OUT_DATA_TYPE = 	"out_datatype";

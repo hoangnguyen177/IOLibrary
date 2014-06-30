@@ -34,7 +34,7 @@ import static edu.monash.io.iolibrary.ConfigurationConsts.CONNECTION_NSP;
 import static edu.monash.io.iolibrary.ConfigurationConsts.CONTAINERID;
 import static edu.monash.io.iolibrary.ConfigurationConsts.LAYOUT_VERTICAL;
 import static edu.monash.io.iolibrary.ConfigurationConsts.LAYOUT;
-
+import static edu.monash.io.iolibrary.ConfigurationConsts.WAIT_FOR_SINK;
 
 
 public class IOChannel extends IOObject{
@@ -66,16 +66,20 @@ public class IOChannel extends IOObject{
 	}
 
 	/*layout*/
-	public void setLayout(String _layout)		{	layout = _layout;	}
-	public String getLayout()					{	return layout;		}
+	public void setLayout(String _layout)				{	layout = _layout;	}
+	public String getLayout()							{	return layout;		}
 
 	/*container id*/
-	public void setContainerId(String _conId)	{	containerId = _conId;	}
-	public String getContainerId()				{	return containerId;		}
+	public void setContainerId(String _conId)			{	containerId = _conId;	}
+	public String getContainerId()						{	return containerId;		}
 
 	/*configuration*/
 	public JsonObject getConfig()						{	return configuration;	}
 	public void setConfiguration(JsonObject _config)	{	configuration = _config;}
+
+	/*waitfor sink*/
+	public void setWaitForSink(boolean _wait)			{ waitforsink = _wait; }
+	public boolean getWaitForSink()						{ return waitforsink;  }
 	// //not needed
 	// public void setConfiguration(){
 	// 	about = new JsonObject();
@@ -89,7 +93,9 @@ public class IOChannel extends IOObject{
 			_path += "." + this.getId(); 
 		if(_subPath.trim().isEmpty() || !variables.containsKey(_subPath))
 			throw new InvalidPathException("There is no variable:" + _subPath); 
-		return IOFactory.getInstance().getBlockingIOInterface(_path);
+		BlockingIOInterface _blockingInterface= IOFactory.getInstance().getBlockingIOInterface(_path);
+		_blockingInterface.setWaitForSink(waitforsink);
+		return _blockingInterface;
 	}
 
 	
@@ -100,7 +106,10 @@ public class IOChannel extends IOObject{
 			_path += "." + this.getId(); 
 		if(_subPath.trim().isEmpty() || !variables.containsKey(_subPath))
 			throw new InvalidPathException("There is no variable:" + _subPath); 
-		return IOFactory.getInstance().getNonBlockingIOInterface(_path);
+//		return IOFactory.getInstance().getNonBlockingIOInterface(_path);
+		NonBlockingIOInterface _nonblockingInterface= IOFactory.getInstance().getNonBlockingIOInterface(_path);
+		_nonblockingInterface.setWaitForSink(waitforsink);
+		return _nonblockingInterface;
 	}
 
 	
@@ -110,6 +119,7 @@ public class IOChannel extends IOObject{
 		JsonObject _obj = super.getObject();
 		_obj.addProperty(LAYOUT, layout);
 		_obj.addProperty(CONTAINERID, containerId);
+		_obj.addProperty(WAIT_FOR_SINK, this.getWaitForSink());
 		_obj.add(CONFIG, configuration);
 		//add variables into the object as well
 		Set<String> _keySet = variables.keySet();
@@ -191,6 +201,8 @@ public class IOChannel extends IOObject{
 				_channel.setContainerId(_value.getAsString());
 			else if(CONFIG.equals(_key))
 				_channel.setConfiguration(_value.getAsJsonObject());
+			else if(WAIT_FOR_SINK.equals(_key))
+				_channel.setWaitForSink(_value.getAsBoolean());
 			else{	//for variable
 				JsonElement _type = _value.getAsJsonObject().get(TYPE);
 				if(_type!=null){
@@ -213,6 +225,8 @@ public class IOChannel extends IOObject{
 	private String layout;
 	//each channel belongs to a container
 	private String containerId;
+	//wait for sink
+	private boolean waitforsink = true; /*default is true*/
 	//each IO channel has a configuration
 	private JsonObject configuration = null;
 	private BlockingIOInterface blockingIO = null;

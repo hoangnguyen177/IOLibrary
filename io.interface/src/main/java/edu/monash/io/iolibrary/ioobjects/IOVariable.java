@@ -26,6 +26,7 @@ import static edu.monash.io.iolibrary.ConfigurationConsts.DATA_UPDATE_MODE;
 
 
 
+
 public class IOVariable extends IOObject{
 
 	public IOVariable(){
