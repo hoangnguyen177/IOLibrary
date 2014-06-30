@@ -257,6 +257,8 @@ io.of(nsp).on(CLIENT_CONST.connect, function (socket) {
   * later can query data, get all messages so far from this source, and 
   * send to the sink, the sink can "replay" or ignore them
   * add an option of querying messages so far, go to mongodb and get messages
+  * this method accepts live or dead sourceid
+  * if the source is not alive, query the database for the recorded messages from that source
   */
   socket.on(CLIENT_CONST.selectsource, function(_sourceid, latestMessageTStamp){
     timeStampToFindMessages = latestMessageTStamp;
@@ -266,62 +268,65 @@ io.of(nsp).on(CLIENT_CONST.connect, function (socket) {
     }
     else  
       console.log("[selectsource] from ", socket.id,  " selectsource:", _sourceid, " timestamp:", latestMessageTStamp);
-    if(isSource(_sourceid, sources))  {
-      //tell the sink that it has been connected to the wanted source. with allowed oeprations
-      var _allowedOpts = MESSAGE_CONST.read;
-      sinks[socket.id].send({ messagetype: SERVER_CONST.connection_established, allowedoperations: _allowedOpts});
-      // when receive message, also checks whether its the first one connected 
-      log("[selectsource] sink:" + socket.id +  " connects to source:" +  _sourceid);
-      //now the messages from the database and send it to the sink
-
-      if(usingdb){
-        db.messages.find({socketid:_sourceid, timestamp:{$gt:timeStampToFindMessages}}, function(err, msgEntries){
-          if( err || !msgEntries) console.log("No messages entry found");
-          else msgEntries.forEach(function(msgEntry) {
-            var _recordedMsgToSend = msgEntry.message;
-            _recordedMsgToSend['timestamp']=msgEntry.timestamp;
-            sinks[socket.id].send(_recordedMsgToSend);
-          });
-          if(connections.hasOwnProperty(_sourceid))
-            connections[_sourceid].push(socket.id);
-          else
-            connections[_sourceid] = [socket.id];
-          //TODO: what if there are messages coming since the last time query the database???  
-          if(socket.id === connections[_sourceid][0]) //first one{}
-            _allowedOpts = _allowedOpts.concat(MESSAGE_CONST.write);
-          sinks[socket.id][CONNECTION_CONST.details][MESSAGE_CONST.allowed_operations] = _allowedOpts;
-          sinks[socket.id].send({messagetype:SERVER_CONST.permission_changed, allowedoperations: _allowedOpts});
-          
-          //notify the source that a new sink has been connected to it
-          //also send the list of sinks that are currently connectd
-          var _msgToSource = {
-            messagetype: SERVER_CONST.sink_connect,
-            sinklist: connections[_sourceid],      
-          };
-          sources[_sourceid].send(_msgToSource);
+    var _allowedOpts = MESSAGE_CONST.read;
+    if(usingdb){
+      db.messages.find({socketid:_sourceid, timestamp:{$gt:timeStampToFindMessages}}, function(err, msgEntries){
+        if( err || !msgEntries || msgEntries.length == 0){
+          console.log("No messages entry found");
+          if(!isSource(_sourceid, sources)){
+            log("[selectsource] "+ _sourceid+ " is an invalid source id");
+            return;
+          }
+        }
+        sinks[socket.id][CONNECTION_CONST.details][MESSAGE_CONST.allowed_operations] = _allowedOpts;
+        sinks[socket.id].send({ messagetype: SERVER_CONST.connection_established, allowedoperations: _allowedOpts});
+        //for each message entry
+        msgEntries.forEach(function(msgEntry) {
+          var _recordedMsgToSend = msgEntry.message;
+          _recordedMsgToSend['timestamp']=msgEntry.timestamp;
+          sinks[socket.id].send(_recordedMsgToSend);
         });
-      }else{
         if(connections.hasOwnProperty(_sourceid))
           connections[_sourceid].push(socket.id);
         else
           connections[_sourceid] = [socket.id];
-        //this is bad practice - copy and paste: TODO: fix this
+        //TODO: what if there are messages coming since the last time query the database???  
         if(socket.id === connections[_sourceid][0]) //first one{}
-            _allowedOpts = _allowedOpts.concat(MESSAGE_CONST.write);
+          _allowedOpts = _allowedOpts.concat(MESSAGE_CONST.write);
         sinks[socket.id][CONNECTION_CONST.details][MESSAGE_CONST.allowed_operations] = _allowedOpts;
         sinks[socket.id].send({messagetype:SERVER_CONST.permission_changed, allowedoperations: _allowedOpts});
+        
         //notify the source that a new sink has been connected to it
         //also send the list of sinks that are currently connectd
         var _msgToSource = {
           messagetype: SERVER_CONST.sink_connect,
           sinklist: connections[_sourceid],      
         };
-        sources[_sourceid].send(_msgToSource);  
-      }
-
+        sources[_sourceid].send(_msgToSource);
+      });
     }
-    else
-      log("[selectsource] "+ _sourceid+ " is an invalid source id");
+    else{
+      if(!isSource(_sourceid, sources)){
+        log("[selectsource] "+ _sourceid+ " is an invalid source id");
+        return;
+      }
+      if(connections.hasOwnProperty(_sourceid))
+          connections[_sourceid].push(socket.id);
+      else
+          connections[_sourceid] = [socket.id];
+      if(socket.id === connections[_sourceid][0]) //first one{}
+        _allowedOpts = _allowedOpts.concat(MESSAGE_CONST.write);
+      sinks[socket.id][CONNECTION_CONST.details][MESSAGE_CONST.allowed_operations] = _allowedOpts;
+      sinks[socket.id].send({ messagetype: SERVER_CONST.connection_established, allowedoperations: _allowedOpts });
+      //notify the source that a new sink has been connected to it
+      //also send the list of sinks that are currently connectd
+      var _msgToSource = {
+        messagetype: SERVER_CONST.sink_connect,
+        sinklist: connections[_sourceid],      
+      };
+      sources[_sourceid].send(_msgToSource);  
+    }
+
   });
 
 
@@ -329,7 +334,9 @@ io.of(nsp).on(CLIENT_CONST.connect, function (socket) {
   socket.on(CLIENT_CONST.message, function(message){
     log("[message] message from ", socket.id , " message:", JSON.stringify(message));
     //store message here
-    var _messageToStore = {'socketid':socket.id, 'message':message, 'timestamp': Date.now()};
+    var _receivedTimeStamp = Date.now();
+    message['timestamp']=_receivedTimeStamp;
+    var _messageToStore = {'socketid':socket.id, 'message':message, 'timestamp': _receivedTimeStamp};
     log("[message] message to store:", JSON.stringify(_messageToStore));
     // message from source
     if(isSource(socket.id, sources)){
@@ -346,7 +353,6 @@ io.of(nsp).on(CLIENT_CONST.connect, function (socket) {
           if( err || !saved ) log("!!!!!!!!!!!!!!!!!Data not saved");
         });
       }
-
     }
     else{  //message from sink
       //only writable client can do that
