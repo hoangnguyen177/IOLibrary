@@ -291,11 +291,13 @@ io.of(nsp).on(CLIENT_CONST.connect, function (socket) {
         else
           connections[_sourceid] = [socket.id];
         //TODO: what if there are messages coming since the last time query the database???  
-        if(socket.id === connections[_sourceid][0]) //first one{}
+        if(socket.id === connections[_sourceid][0]){
           _allowedOpts = _allowedOpts.concat(MESSAGE_CONST.write);
-        sinks[socket.id][CONNECTION_CONST.details][MESSAGE_CONST.allowed_operations] = _allowedOpts;
-        sinks[socket.id].send({messagetype:SERVER_CONST.permission_changed, allowedoperations: _allowedOpts});
-        
+          sinks[socket.id][CONNECTION_CONST.details][MESSAGE_CONST.allowed_operations] = _allowedOpts;
+          sinks[socket.id].send({messagetype:SERVER_CONST.permission_changed, allowedoperations: _allowedOpts});
+          console.log("====socketid:", socket.id, " permission:", sinks[socket.id][CONNECTION_CONST.details][MESSAGE_CONST.allowed_operations]);
+        }
+          
         //notify the source that a new sink has been connected to it
         //also send the list of sinks that are currently connectd
         var _msgToSource = {
@@ -314,10 +316,12 @@ io.of(nsp).on(CLIENT_CONST.connect, function (socket) {
           connections[_sourceid].push(socket.id);
       else
           connections[_sourceid] = [socket.id];
-      if(socket.id === connections[_sourceid][0]) //first one{}
+      if(socket.id === connections[_sourceid][0]){
         _allowedOpts = _allowedOpts.concat(MESSAGE_CONST.write);
-      sinks[socket.id][CONNECTION_CONST.details][MESSAGE_CONST.allowed_operations] = _allowedOpts;
-      sinks[socket.id].send({ messagetype: SERVER_CONST.connection_established, allowedoperations: _allowedOpts });
+        sinks[socket.id][CONNECTION_CONST.details][MESSAGE_CONST.allowed_operations] = _allowedOpts;
+        sinks[socket.id].send({ messagetype: SERVER_CONST.connection_established, allowedoperations: _allowedOpts });
+        console.log("====socketid:", socket.id, " permission:", sinks[socket.id][CONNECTION_CONST.details][MESSAGE_CONST.allowed_operations]);
+      }
       //notify the source that a new sink has been connected to it
       //also send the list of sinks that are currently connectd
       var _msgToSource = {
@@ -332,12 +336,12 @@ io.of(nsp).on(CLIENT_CONST.connect, function (socket) {
 
   /////////////// message ///////////////////
   socket.on(CLIENT_CONST.message, function(message){
-    log("[message] message from ", socket.id , " message:", JSON.stringify(message));
+    //log("[message] message from ", socket.id , " message:", JSON.stringify(message));
     //store message here
     var _receivedTimeStamp = Date.now();
     message['timestamp']=_receivedTimeStamp;
     var _messageToStore = {'socketid':socket.id, 'message':message, 'timestamp': _receivedTimeStamp};
-    log("[message] message to store:", JSON.stringify(_messageToStore));
+    //log("[message] message to store:", JSON.stringify(_messageToStore));
     // message from source
     if(isSource(socket.id, sources)){
       //distribute it to the sinks
@@ -355,8 +359,10 @@ io.of(nsp).on(CLIENT_CONST.connect, function (socket) {
       }
     }
     else{  //message from sink
+      log("[message] message from ", socket.id , " message:", JSON.stringify(message));
+      
       //only writable client can do that
-      if(isSocketWritable(socket)){
+      if(isSinkWritable(socket.id)){
         var _sourceIdOfTheSink = findSource(socket.id, connections);
         if(_sourceIdOfTheSink){
           // send to source
@@ -423,8 +429,8 @@ io.of(nsp).on(CLIENT_CONST.connect, function (socket) {
           var _allowedOpts = _newFirstSink[CONNECTION_CONST.details][MESSAGE_CONST.allowed_operations];
            // add w into it 
           _allowedOpts = _allowedOpts.concat(MESSAGE_CONST.write);
-          _newFirstSink.send({messagetype:SERVER_CONST.permission_changed, allowedoperations: _allowedOpts});
           _newFirstSink[CONNECTION_CONST.details][MESSAGE_CONST.allowed_operations] = _allowedOpts;
+          _newFirstSink.send({messagetype:SERVER_CONST.permission_changed, allowedoperations: _allowedOpts});
           log("[disconnect] sink removed is the first sink, assign new writing sink")
         }
         else if(connections[_sourceConnectionId].length == 0){
@@ -597,6 +603,15 @@ function removeElementFromArray(elementVal, array){
 function isSocketWritable(_socket){
   return (_socket[CONNECTION_CONST.details][MESSAGE_CONST.allowed_operations].indexOf(MESSAGE_CONST.write) !== -1);
 }
+
+
+/**
+* is sink writable
+*/
+function isSinkWritable(_sinkid){
+  return (sinks[_sinkid][CONNECTION_CONST.details][MESSAGE_CONST.allowed_operations].indexOf(MESSAGE_CONST.write) !== -1);
+}
+
 
 /**
 * prepare message to send
